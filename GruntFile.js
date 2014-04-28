@@ -14,7 +14,7 @@
 
 				},
 				src: "src/styles/css/style.css",
-				dest: "src/styles/css/style_prefixed.css"
+				dest: "public/assets/styles/style.css"
 			}
 		},
 		cssmin: {
@@ -23,7 +23,7 @@
 					banner: "/* Minified style */"
 				},
 				files: {
-					"assets/styles/style.css": ["src/styles/css/style_prefixed.css"]
+					"public/assets/styles/style.min.css": ["public/assets/styles/style.css"]
 				}
 			}
 		},
