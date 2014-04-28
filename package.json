@@ -1,0 +1,19 @@
+{
+	"name": "evedbexplorer",
+	"description": "An web based item database for Eve online.",
+	"version": "0.1.0",
+    "private": true,
+    "dependencies": {
+		"express": "~4.0.x",
+		"morgan": "~1.0.x",
+		"body-parser": "~1.0.x",
+		"method-override": "~1.0.x",
+	},
+	"devDependencies": {
+		"grunt-autoprefixer": "0.6.x",
+		"grunt-contrib-less": "0.9.x",
+		"grunt-contrib-cssmin": "0.7.x",
+		"grunt-contrib-watch": "0.5.x"
+	},
+	"main": "server.js"
+}
