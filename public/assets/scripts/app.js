@@ -47,7 +47,11 @@ MarketGroups.prototype.loadParentGroups = function() {
 	self.api.getParentMarketGroups().then(function(result) {
 		//Loop through all results creating new
 		for (var i = 0; i < result.result.length; i++) {
-			self.marketGroups.push(new MarketGroup(self.api, result.result[i]));
+
+			var mg = new MarketGroup(self.api, result.result[i]);
+			//mg.visible = true;
+
+			self.marketGroups.push(mg);
 		}
 	});
 };
@@ -56,14 +60,11 @@ MarketGroups.prototype.loadParentGroups = function() {
 var MarketGroup = function(api, data) {
 	this.api = api;
 	this.data = data;
-	this.isToggled = false;
+	this.visible = false;
 
 	this.name = this.data.marketGroupName;
 	this.children = [];
-
-	this.showChildren = false;
-	this.childGroups = [];
-	this.types = [];
+	this.childrenLoaded = false;
 };
 
 
@@ -79,7 +80,13 @@ MarketGroup.prototype.loadChildren = function() {
 
 MarketGroup.prototype.toggle = function() {
 	console.log("Toggled");
-	this.isToggled = !this.isToggled;
+
+	if (!this.childrenLoaded) {
+		this.childrenLoaded = true;
+		this.loadChildren();
+	}
+
+	this.visible = !this.visible;
 };
 
 
@@ -101,32 +108,10 @@ app.directive('accordianrow', function($compile) {
 		scope: {
 			member: '='
 		},
-		template: "<li ng-click='member.loadChildren()'>{{ member.name }} {{ member.children.length }}</li>",
+		template: "<li ng-click='member.toggle(); $event.stopPropagation();' >{{ member.name }} {{ member.children.length }}</li>",
 		link: function (scope, element, attrs) {
-			console.log("rendering");
-			console.log(scope);
 			if (angular.isArray(scope.member.children)) {
-				element.append("<accordian items='member.children'></accordian>");
-				$compile(element.contents())(scope);
-			}
-		}
-	};
-});
-
-
-app.directive('marketgroup', function() {
-	return {
-		restrict: "E",
-		replace: true,
-		scope: {
-			groups: '='
-		},
-		template: "<div ng-repeat='mg in groups' ng-click='mg.toggle()'>{{ mg.data.marketGroupName }} <div ng-show='mg.isToggled'></div></div>",
-		link: function (scope, element, attrs) {
-			console.log("Here");
-			if (angular.isArray(scope.groups.children) && (scope.groups.children.length > 0)) {
-				console.log("Wat");
-				element.append("<marketgroup groups='mg.childGroups'></collection>");
+				element.append("<accordian ng-show='member.visible' items='member.children'></accordian>");
 				$compile(element.contents())(scope);
 			}
 		}
