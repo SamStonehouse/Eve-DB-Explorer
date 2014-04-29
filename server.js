@@ -15,7 +15,7 @@ app.use(morgan('dev'));
 app.use(express.static(pub));
 
 app.get('/', function(req, res) {
-	res.render('index');
+	res.render('pages/index');
 });
 
 app.listen(port);

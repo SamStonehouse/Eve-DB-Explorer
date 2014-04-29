@@ -1,0 +1,14 @@
+extends ../layouts/sidebar-layout
+
+block header
+	include ../includes/header
+
+block sidebar
+	div(ng-controller="sidebarController")
+		accordian(items="data.marketGroups")
+
+block main
+	h1 Test
+
+block footer
+	include ../includes/footer
