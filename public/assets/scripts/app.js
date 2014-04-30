@@ -23,6 +23,12 @@ app.factory('api', function($http, urls) {
 				console.log("Market Group by Parent ID response");
 				return result.data;
 			});
+		},
+		getTypesByMarketGroupID: function(mgID) {
+			return $http.jsonp(urls.baseApiURL + "/api/inv/types/marketgroup/" + mgID + "?callback=JSON_CALLBACK").then(function(result) {
+				console.log("Types in market group by market group ID response");
+				return result.data;
+			});
 		}
 	};
 });
@@ -72,14 +78,36 @@ MarketGroup.prototype.loadChildren = function() {
 	var self = this;
 
 	self.api.getMarketGroupByID(self.data.marketGroupID).then(function(result) {
-		for (var i = 0; i < result.result.length; i++) {
-			self.children.push(new MarketGroup(self.api, result.result[i]));
+
+		var subMarketGroups = [];
+
+		if (result.result) {
+			for (var i = 0; i < result.result.length; i++) {
+				subMarketGroups.push(new MarketGroup(self.api, result.result[i]));
+			}
 		}
+
+		self.children[0] = subMarketGroups;
+
 	});
+
+	self.api.getTypesByMarketGroupID(self.data.marketGroupID).then(function(result) {
+
+		var subTypeItems = [];
+
+		if (result.result) {
+			for (var i = 0; i < result.result.length; i++) {
+				subTypeItems.push(new Type(result.result[i]));
+			}
+		}
+
+		self.children[1] = subTypeItems;
+	});
+
 };
 
-MarketGroup.prototype.toggle = function() {
-	console.log("Toggled");
+MarketGroup.prototype.click = function() {
+	console.log("Marketgroup Toggled");
 
 	if (!this.childrenLoaded) {
 		this.childrenLoaded = true;
@@ -87,6 +115,15 @@ MarketGroup.prototype.toggle = function() {
 	}
 
 	this.visible = !this.visible;
+};
+
+var Type = function(data) {
+	this.data = data;
+	this.name = data.typeName;
+};
+
+Type.prototype.click = function() {
+	console.log("Type Clicked");
 };
 
 
@@ -108,12 +145,12 @@ app.directive('accordianrow', function($compile) {
 		scope: {
 			member: '='
 		},
-		template: "<li ng-click='member.toggle(); $event.stopPropagation();' >{{ member.name }} {{ member.children.length }}</li>",
+		template: "<li ng-click='member.click(); $event.stopPropagation();' >{{ member.name }} {{ member.children[0].length }}</li>",
 		link: function (scope, element, attrs) {
 			if (angular.isArray(scope.member.children)) {
-				element.append("<accordian ng-show='member.visible' items='member.children'></accordian>");
-				$compile(element.contents())(scope);
+				element.append("<accordian ng-repeat='subacc in member.children' ng-show='member.visible' items='subacc'></accordian>");
 			}
+			$compile(element.contents())(scope);
 		}
 	};
 });
