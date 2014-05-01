@@ -5888,6 +5888,8 @@ body {
   margin: 0;
   padding: 0;
   font-size: 16px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 200;
 }
 .wrapper {
   display: -webkit-box;
@@ -5907,15 +5909,89 @@ body {
   -ms-flex: 1 100%;
   flex: 1 100%;
 }
+#header {
+  padding: 10px;
+  background-color: #172c41;
+  color: #fff;
+}
+#header .page-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.wrapper {
+  background-color: #fff;
+}
+html,
+body,
+#footer {
+  background-color: #f4f4f4;
+  color: #333333;
+}
+#footer {
+  color: #888;
+  padding: 10px;
+}
+#footer p {
+  padding: 0;
+  margin: 0;
+}
+.accordian {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.accordian li {
+  padding: 0;
+  margin: 0;
+}
+.accordian .row-content {
+  padding: 2px;
+  margin: 2px;
+  display: block;
+  cursor: pointer;
+}
+.accordian .row-content:hover {
+  background-color: #30608e;
+  color: #fff;
+  font-weight: 200;
+}
+.accordian .row-content.depth-0 {
+  padding-left: 5px;
+}
+.accordian .row-content.depth-1 {
+  padding-left: 10px;
+}
+.accordian .row-content.depth-2 {
+  padding-left: 15px;
+}
+.accordian .row-content.depth-3 {
+  padding-left: 25px;
+}
+.accordian .row-content.depth-4 {
+  padding-left: 30px;
+}
+.accordian .row-content.depth-5 {
+  padding-left: 35px;
+}
+.accordian .row-content.depth-6 {
+  padding-left: 40px;
+}
+.accordian.active {
+  background-color: rgba(48, 96, 142, 0.1);
+}
 @media all and (min-width: 800px) {
   /* We invert order of first sidebar and main
 	* And tell the main element to take twice as much width as the other two sidebars 
 	*/
   #main {
-    -webkit-box-flex: 4;
-    -webkit-flex: 4 0px;
-    -ms-flex: 4 0px;
-    flex: 4 0px;
+    -webkit-box-flex: 40;
+    -webkit-flex: 40 0px;
+    -ms-flex: 40 0px;
+    flex: 40 0px;
   }
   #sidebar {
     -webkit-box-ordinal-group: 2;

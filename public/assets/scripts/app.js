@@ -55,7 +55,6 @@ MarketGroups.prototype.loadParentGroups = function() {
 		for (var i = 0; i < result.result.length; i++) {
 
 			var mg = new MarketGroup(self.api, result.result[i]);
-			//mg.visible = true;
 
 			self.marketGroups.push(mg);
 		}
@@ -68,9 +67,14 @@ var MarketGroup = function(api, data) {
 	this.data = data;
 	this.visible = false;
 
+	//Accordian Data
 	this.name = this.data.marketGroupName;
 	this.children = [];
+	this.extraClasses = 'marketgroup-accordian';
+
 	this.childrenLoaded = false;
+
+
 };
 
 
@@ -107,6 +111,10 @@ MarketGroup.prototype.loadChildren = function() {
 };
 
 MarketGroup.prototype.click = function() {
+	this.toggle();
+};
+
+MarketGroup.prototype.toggle = function() {
 	console.log("Marketgroup Toggled");
 
 	if (!this.childrenLoaded) {
@@ -120,6 +128,9 @@ MarketGroup.prototype.click = function() {
 var Type = function(data) {
 	this.data = data;
 	this.name = data.typeName;
+
+
+	this.extraClasses = 'type-accordian';
 };
 
 Type.prototype.click = function() {
@@ -132,9 +143,10 @@ app.directive('accordian', function() {
 		restrict: "E",
 		replace: true,
 		scope: {
-			items: '='
+			items: '=',
+			depth: '='
 		},
-		template: "<ul class='accordian'><accordianrow ng-repeat='child in items' member='child'></accordianrow></ul>"
+		template: "<ul class='accordian'><accordianrow depth='depth' class='depth-{{ depth }}' ng-repeat='child in items' member='child'></accordianrow></ul>"
 	};
 });
 
@@ -143,12 +155,13 @@ app.directive('accordianrow', function($compile) {
 		restrict: "E",
 		replace: true,
 		scope: {
-			member: '='
+			member: '=',
+			depth: '='
 		},
-		template: "<li ng-click='member.click(); $event.stopPropagation();' >{{ member.name }} {{ member.children[0].length }}</li>",
+		template: "<li ng-click='member.click(); $event.stopPropagation();'  class='depth-{{ depth }}'  ><span class='row-content depth-{{ depth }}'>{{ member.name }}</span></li>",
 		link: function (scope, element, attrs) {
 			if (angular.isArray(scope.member.children)) {
-				element.append("<accordian ng-repeat='subacc in member.children' ng-show='member.visible' items='subacc'></accordian>");
+				element.append("<accordian depth='depth + 1' ng-class='{ active: member.visible }' ng-repeat='subacc in member.children' ng-show='member.visible' items='subacc'></accordian>");
 			}
 			$compile(element.contents())(scope);
 		}
