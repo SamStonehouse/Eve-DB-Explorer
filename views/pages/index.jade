@@ -8,10 +8,10 @@ block sidebar
 		accordian(items="data.marketGroups", depth="0")
 
 block main
-	h1 Test
-	p Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum id leo justo. Nullam quis rutrum nulla. Sed iaculis metus felis, a semper felis sagittis vel. Nulla tempus justo lorem, ut rutrum augue pharetra at. In neque est, sodales et metus et, ullamcorper semper erat. In fermentum laoreet nisi, nec ornare nisi cursus egestas. Nulla eget ligula enim. Donec a sem faucibus dui blandit cursus quis vel diam. Suspendisse tristique sed ipsum a tincidunt. Nam elementum commodo lacinia. Quisque libero sapien, pulvinar a lobortis in, pharetra non quam.
-	p Aenean risus nisi, pharetra ut orci nec, malesuada hendrerit tortor. Etiam suscipit tortor vel velit eleifend molestie. Etiam eu arcu tempus, adipiscing diam eget, molestie arcu. Fusce diam dolor, fermentum et vehicula a, malesuada id elit. Phasellus sit amet velit congue, commodo nibh in, sollicitudin nibh. Nullam at turpis diam. Proin venenatis lacus aliquet lectus porttitor rutrum. Nulla in ornare augue. Ut nec urna at libero eleifend interdum.
-	p Nam aliquam ac mi in varius. Quisque laoreet justo eget nisi ultricies, non imperdiet lectus dignissim. Maecenas arcu ligula, lacinia non consequat sed, pharetra accumsan nisi. Aenean non dapibus nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nullam mollis condimentum massa. Mauris vel orci elit. Nullam dui dui, faucibus et ipsum ac, volutpat iaculis eros. Aliquam eu diam erat. Sed cursus lectus eu dui facilisis pulvinar. Suspendisse vehicula non felis eu molestie. Etiam congue sem erat, vitae euismod augue imperdiet in.
+	div(ng-controller="typeController")
+		h1 {{ typeManagerData.activeType.data.typeName }}
+		p {{ typeManagerData.activeType.data.description }}
+		p {{ typeManagerData.activeType.data.attributes.length }}
 
 block footer
 	include ../includes/footer

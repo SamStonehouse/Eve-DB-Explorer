@@ -5873,9 +5873,8 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-size: 16px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 200;
+  font-size: 14px;
+  font-family: Arial;
 }
 .wrapper {
   display: flex;
@@ -5898,6 +5897,9 @@ body {
 }
 .wrapper {
   background-color: #fff;
+}
+#main {
+  padding: 10px;
 }
 html,
 body,
