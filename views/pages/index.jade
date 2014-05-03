@@ -4,14 +4,12 @@ block header
 	include ../includes/header
 
 block sidebar
-	div(ng-controller="sidebarController")
+	div(ng-controller="marketGroupController")
 		accordian(items="data.marketGroups", depth="0")
 
 block main
-	div(ng-controller="typeController")
-		h1 {{ typeManagerData.activeType.data.typeName }}
-		p {{ typeManagerData.activeType.data.description }}
-		p {{ typeManagerData.activeType.data.attributes.length }}
+	div(ng-controller="typeDisplayController")
+		
 
 block footer
 	include ../includes/footer
