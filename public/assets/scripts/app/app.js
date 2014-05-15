@@ -8,31 +8,20 @@ app.factory('typeDisplayFactory', function() {
 	return data;
 });
 
-app.controller('marketGroupController',	['$scope', 'api', 'MarketGroup', function($scope, api, MarketGroup) {
+app.controller('marketGroupController',	['$scope', 'api', 'MarketGroup', 'treeaccordian', function($scope, api, MarketGroup, treeaccordian) {
+	var marketGroupAccordian = new treeaccordian.TreeAccordian();
+
 	$scope.data = {};
+	$scope.data.marketGroupAccordian = marketGroupAccordian;
 
-	$scope.data.marketGroups = [];
 
-	var marketGroupRef = {};
-
-	api.getMarketGroups(function(response) {
-		var loadedGroups = [];
-
-		for (var i = 0; i < response.result.length; i++) {
-			var currentMg = response.result[i];
-			var mg = new MarketGroup(currentMg.marketGroupID, currentMg.marketGroupName, currentMg.parentGroupID);
-			marketGroupRef[currentMg.marketGroupID] = mg;
-			loadedGroups.push(mg);
+	api.getMarketGroups(function(result) {
+		for (var i = 0; i < result.length; i++) {
+			var accNode = new treeaccordian.AccordianNode(result[i].marketGroupName, result[i].marketGroupID, result[i].parentGroupID);
+			marketGroupAccordian.addNode(accNode, result[i].parentGroupID);
 		}
 
-		for (var j = 0; j < loadedGroups.length; j++) {
-			var parentID = loadedGroups[j].parentGroupID;
-			if (parentID === null) {
-				$scope.data.marketGroups.push(loadedGroups[j]);
-			} else if (marketGroupRef.hasOwnProperty(parentID)) {
-				marketGroupRef[parentID].addChild(loadedGroups[j]);
-			}
-		}
+		console.log(marketGroupAccordian);
 	});
 }]);
 
@@ -47,7 +36,25 @@ app.factory('api', function($http) {
 
 			return $http.jsonp(url).then(function(result) {
 				console.log("Marketgroups response");
-				cb(result.data);
+				cb(result.data.result);
+			});
+		},
+		getParentMarketGroups: function() {
+
+			var url = "http://localhost:8080/api/inv/marketgroups/parent/null?callback=JSON_CALLBACK";
+
+			return $http.jsonp(url).then(function(result) {
+				console.log("Parent Market Group Response");
+				return result.data;
+			});
+		},
+		getTypesByMarketGroupID: function(mgID) {
+
+			var url = "http://localhost:8080/api/inv/types/marketgroup/" + mgID + "?callback=JSON_CALLBACK";
+
+			return $http.jsonp(url).then(function(result) {
+				console.log("Types in market group by market group ID response");
+				return result.data;
 			});
 		}
 	};
@@ -83,30 +90,97 @@ app.factory('MarketGroup', function() {
 });
 
 
-app.directive('accordian', function() {
+app.factory('treeaccordian', function() {
+
+	var TreeAccordian = function() {
+		this.children = [];
+		this.allNodes = {};
+		this.parentlessNodes = {};
+	};
+
+	TreeAccordian.prototype.addNode = function(node) {
+		//Add to all nodes collection
+		this.allNodes[node.id] = node;
+
+		if (node.parentID === null) {
+			this.children.push(node);
+		}
+
+		//Check the parent is already in the tree
+		if (this.allNodes.hasOwnProperty(node.parentID)) {
+			//The parent is already in the tree, just add it
+			this.allNodes[node.parentID].addChild(node);
+		} else {
+
+			//The parent is not already in the tree
+			if (!this.parentlessNodes.hasOwnProperty(node.parentID)) {
+				this.parentlessNodes[node.parentID] = [];
+			}
+
+			this.parentlessNodes[node.parentID].push(node);
+		}
+
+		//Check there aren't parentless nodes waiting for this node
+		if (this.parentlessNodes.hasOwnProperty(node.id)) {
+			for (var i = 0; i < this.parentlessNodes[node.id]; i++) {
+				node.addChild(this.parentlessNodes[node.parentID]);
+			}
+
+			delete this.parentlessNodes[node.id];
+		}
+	};
+
+	var AccordianNode = function(name, id, parentID) {
+		this.children = {};
+		this.expanded = false;
+		this.name = name;
+		this.id = id;
+		this.parentID = parentID;
+		this.clickFn = function() {};
+	};
+
+	AccordianNode.prototype.addChild = function(child) {
+		this.children[child.id] = child;
+	};
+
+	AccordianNode.prototype.onClick = function(fn) {
+		this.clickFn = fn;
+	};
+
+	AccordianNode.prototype.click = function() {
+		this.expanded = !this.expanded;
+		this.clickFn(this.children);
+	};
+
+	return {
+		TreeAccordian: TreeAccordian,
+		AccordianNode: AccordianNode
+	};
+
+});
+
+app.directive('accordiancontainer', function() {
 	return {
 		restrict: "E",
 		replace: true,
 		scope: {
-			items: '=',
-			depth: '='
+			children: '='
 		},
-		template: "<ul class='accordian'><accordianrow depth='depth' class='depth-{{ depth }}' ng-repeat='child in items' member='child'> {{ items }} </accordianrow></ul>"
+		template: "<ul class='accordian'><node ng-repeat='node in children' node='node'></node></ul>"
 	};
 });
 
-app.directive('accordianrow', function($compile) {
+app.directive('node', function($compile) {
 	return {
 		restrict: "E",
 		replace: true,
 		scope: {
-			member: '=',
-			depth: '='
+			node: '='
 		},
-		template: "<li ng-click='member.click(); $event.stopPropagation();'  class='depth-{{ depth }}'  ><span class='row-content depth-{{ depth }}'>{{ member.name }}</span></li>",
+		template: "<li ng-click='node.click(); $event.stopPropagation();'>{{ node.name }}</li>",
 		link: function (scope, element, attrs) {
-			if (angular.isArray(scope.member.children)) {
-				element.append("<accordian depth='depth + 1' ng-class='{ active: member.visible }' ng-show='member.visibleChildren' items='member.children'></accordian>");
+			if (Object.keys(scope.node.children).length > 0) {
+				element.append("<accordiancontainer ng-class='{ active: node.expanded }' ng-show='node.expanded' children='node.children'></accordiancontainer>");
 			}
 			$compile(element.contents())(scope);
 		}

@@ -5,7 +5,7 @@ block header
 
 block sidebar
 	div(ng-controller="marketGroupController")
-		accordian(items="data.marketGroups", depth="0")
+		accordiancontainer(children="data.marketGroupAccordian.children")
 
 block main
 	div(ng-controller="typeDisplayController")
