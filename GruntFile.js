@@ -27,13 +27,27 @@
 				}
 			}
 		},
+		concat: {
+			angular_app: {
+				files: {
+					'public/assets/scripts/app/app.js': ['src/scripts/*.js', 'src/scripts/**/*.js']
+				},
+			},
+		},
 		watch: {
 			styles: {
 				options: {
 					livereload: true
 				},
-				files: "src/styles/less/*.less",
+				files: "src/styles/**/*.less",
 				tasks: ["styles"]
+			},
+			scripts: {
+				options: {
+					livereload: true
+				},
+				files: "src/scripts/*.js",
+				tasks: ["scripts"]
 			}
 		}
 	});
@@ -41,8 +55,10 @@
 	grunt.loadNpmTasks("grunt-contrib-less");
 	grunt.loadNpmTasks("grunt-autoprefixer");
 	grunt.loadNpmTasks("grunt-contrib-cssmin");
+	grunt.loadNpmTasks("grunt-contrib-concat");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	grunt.registerTask("default", ["less", "autoprefixer", "cssmin"]);
+	grunt.registerTask("default", ["less", "autoprefixer", "cssmin", "concat"]);
 	grunt.registerTask("styles", ["less", "autoprefixer", "cssmin"]);
+	grunt.registerTask("scripts", ["concat"]);
 };

@@ -14,7 +14,8 @@
 		"grunt-autoprefixer": "0.6.x",
 		"grunt-contrib-less": "0.9.x",
 		"grunt-contrib-cssmin": "0.7.x",
-		"grunt-contrib-watch": "0.5.x"
+		"grunt-contrib-watch": "0.5.x",
+		"grunt-contrib-concat": "0.4.x"
 	},
 	"main": "server.js"
 }

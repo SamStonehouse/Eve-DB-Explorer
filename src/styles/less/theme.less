@@ -1,0 +1,81 @@
+//Main Colors
+@mc: #30608e;
+@dc: #244667;
+@ddc: #172c41;
+
+//Unsaturated Colors
+@uscm: #f4f4f4;
+@usdc: #878787;
+@usddc: #757575;
+	
+//Body Color
+@bc: #333;
+
+html, body {
+	background-color: @uscm;
+	color: @bc;
+}
+
+
+#header {
+	background-color: @ddc;
+	color: #fff;
+	
+	.page-title {
+		font-size: 1.4rem;
+		font-weight: 700;
+	}
+}
+
+#sidebar {
+	background-color: #f4f4f4;
+}
+
+#footer {
+	background-color: @uscm;
+	color: @bc;
+}
+
+.wrapper {
+	background-color: #fff;
+}
+
+
+
+html, body, #footer {
+	background-color: @uscm;
+	color: @bc;
+}
+
+#footer {
+	color: #888;
+
+	p {
+		padding: 0;
+		margin: 0;
+	}
+}
+
+.accordian {
+
+	.node-name.active {
+		:before {
+			content: "\f107";
+		}
+	}
+
+
+	li {
+		cursor: pointer;
+		position: relative;
+
+		.node-name {
+			display: block;
+		}
+
+		.node-name:hover {
+			background-color: @mc;
+			color: #fff;
+		}
+	}
+}
