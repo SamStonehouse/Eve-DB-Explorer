@@ -46,7 +46,7 @@
 				options: {
 					livereload: true
 				},
-				files: "src/scripts/*.js",
+				files: "src/scripts/**/*.js",
 				tasks: ["scripts"]
 			}
 		}
