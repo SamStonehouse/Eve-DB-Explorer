@@ -1,13 +1,23 @@
-angular.module('datastore', ['datastore.marketgroups']).
+angular.module('datastore', ['datastore.marketgroup', 'api']).
 
-factory('MarketGroups', ['MarketGroup', function() {
+factory('MarketGroups', ['MarketGroup', 'apiMethods', function(MarketGroup, apiMethods) {
 
-	var mgIDReference = {};
+	var marketGroups = {};
 
 	var marketGroupsLoaded = false;
 
-	var getMarketGroups = function() {
-
+	var getMarketGroups = function(cb) {
+		if (marketGroupsLoaded) {
+			cb(marketGroups);
+		} else {
+			apiMethods.getMarketGroups(function(result) {
+				for (var i = 0; i < result.length; i++) {
+					marketGroups[result[i].marketGroupID] = new MarketGroup(result[i]);
+				}
+				marketGroupsLoaded = true;
+				cb(marketGroups);
+			});
+		}
 	};
 
 	var getMarketGroup = function(id) {

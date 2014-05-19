@@ -43,13 +43,6 @@ factory('treeaccordian', function() {
 	};
 
 	TreeAccordian.prototype.getNode = function(nodeID) {
-		console.log("All Nodes:");
-		console.dir(this.allNodes);
-		console.log("Children");
-		console.dir(this.children);
-		console.log("This");
-		console.dir(this);
-
 		if (this.allNodes.hasOwnProperty(nodeID)) {
 			return this.allNodes[nodeID];
 		}
@@ -60,7 +53,7 @@ factory('treeaccordian', function() {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
-		this.id = id.toString();
+		this.id = id;
 		this.parentID = parentID;
 		this.clickFn = function() {};
 		this.hasChildren = false;

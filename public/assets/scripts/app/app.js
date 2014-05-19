@@ -1,14 +1,16 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'api']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
 
-app.controller('marketGroupController',	['$scope', 'apiMethods', 'treeaccordian', function($scope, apiMethods, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroups', 'treeaccordian', function($scope, MarketGroups, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
 
-	apiMethods.getMarketGroups(function(result) {
-		for (var i = 0; i < result.length; i++) {
-			var accNode = new treeaccordian.AccordianNode(result[i].marketGroupName, result[i].marketGroupID, result[i].parentGroupID);
-			marketGroupAccordian.addNode(accNode, result[i].parentGroupID);
+	MarketGroups.getMarketGroups(function(result) {
+		for (var i in result) {
+			if (result.hasOwnProperty(i)) {
+				var accNode = new treeaccordian.AccordianNode(result[i].name, result[i].id, result[i].parentID);
+				marketGroupAccordian.addNode(accNode, result[i].parentID);
+			}
 		}
 	});
 
@@ -81,16 +83,26 @@ factory('marketgroupapi', function($http) {
 		}
 	};
 });
-angular.module('datastore', ['datastore.marketgroups']).
+angular.module('datastore', ['datastore.marketgroup', 'api']).
 
-factory('MarketGroups', ['MarketGroup', function() {
+factory('MarketGroups', ['MarketGroup', 'apiMethods', function(MarketGroup, apiMethods) {
 
-	var mgIDReference = {};
+	var marketGroups = {};
 
 	var marketGroupsLoaded = false;
 
-	var getMarketGroups = function() {
-
+	var getMarketGroups = function(cb) {
+		if (marketGroupsLoaded) {
+			cb(marketGroups);
+		} else {
+			apiMethods.getMarketGroups(function(result) {
+				for (var i = 0; i < result.length; i++) {
+					marketGroups[result[i].marketGroupID] = new MarketGroup(result[i]);
+				}
+				marketGroupsLoaded = true;
+				cb(marketGroups);
+			});
+		}
 	};
 
 	var getMarketGroup = function(id) {
@@ -120,12 +132,38 @@ angular.module('datastore.marketgroup', []).
 
 factory("MarketGroup", function() {
 	var MarketGroup = function(mgdata) {
-		this.id = mgdata.MarketGroupID;
+		this.id = mgdata.marketGroupID;
 		this.name = mgdata.marketGroupName;
-		this.parentGroupID = mgdata.parentGroupID;
+		this.parentID = mgdata.parentGroupID;
 	};
 
 	return MarketGroup;
+}).
+
+factory("MarketGroups", function() {
+	var MarketGroups = function() {
+		this.marketGroupsByID = {};
+
+		this.marketGroupsLoaded = false;
+	};
+
+	MarketGroups.prototype.getMarketGroupByID = function() {
+		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
+			return this.marketGroupsByID[marketGroupID];
+		}
+		
+		throw new Error("No such marketGroup");
+	};
+
+	MarketGroups.prototype.marketGroupLoaded = function(marketGroupID) {
+		return this.marketGroupsByID.hasOwnProperty(marketGroupID);
+	};
+
+	MarketGroups.prototype.setMarketGroupByID = function(marketGroup) {
+		this.marketGroupsByID[marketGroup.id] = marketGroup;
+	};
+
+	return MarketGroups;
 }).
 
 factory("MarketGroupType", function() {
@@ -135,6 +173,30 @@ factory("MarketGroupType", function() {
 	};
 
 	return MarketGroupType;
+}).
+
+factory("MarketGroupTypes", function() {
+	var MarketGroupTypes = function() {
+
+	};
+
+	MarketGroupTypes.prototype.getMarketGroupTypesByMarketGroupID = function() {
+
+	};
+
+	MarketGroupTypes.prototype.getAllMarketGroupTypes = function() {
+
+	};
+
+	MarketGroupTypes.prototype.setMarketGroupTypesByParentID = function(parentID, types) {
+
+	};
+
+	MarketGroupTypes.prototype.setAllMarketGroupTypes = function() {
+
+	};
+
+	return MarketGroupTypes;
 });
 angular.module('ui.treeaccordian', []).
 
@@ -181,13 +243,6 @@ factory('treeaccordian', function() {
 	};
 
 	TreeAccordian.prototype.getNode = function(nodeID) {
-		console.log("All Nodes:");
-		console.dir(this.allNodes);
-		console.log("Children");
-		console.dir(this.children);
-		console.log("This");
-		console.dir(this);
-
 		if (this.allNodes.hasOwnProperty(nodeID)) {
 			return this.allNodes[nodeID];
 		}
@@ -198,7 +253,7 @@ factory('treeaccordian', function() {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
-		this.id = id.toString();
+		this.id = id;
 		this.parentID = parentID;
 		this.clickFn = function() {};
 		this.hasChildren = false;
