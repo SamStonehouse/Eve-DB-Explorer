@@ -1,13 +1,5 @@
 var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'api']);
 
-app.factory('typeDisplayFactory', function() {
-	var data = {};
-
-	data.activeType = {};
-
-	return data;
-});
-
 app.controller('marketGroupController',	['$scope', 'apiMethods', 'treeaccordian', function($scope, apiMethods, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
@@ -20,12 +12,7 @@ app.controller('marketGroupController',	['$scope', 'apiMethods', 'treeaccordian'
 		}
 	});
 
-
-	$scope.data.marketGroupAccordian = marketGroupAccordian;//.getNode("id9");
-
-	console.dir(Object.keys(marketGroupAccordian.allNodes));
-	console.dir(marketGroupAccordian.getNode(9));
-	// console.dir($scope.data.marketGroupAccordian.allNodes["id9"]);
+	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
 }]);
 
 app.controller('typeDisplayController', ['$scope', function($scope) {

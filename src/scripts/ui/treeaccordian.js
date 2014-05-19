@@ -18,8 +18,10 @@ factory('treeaccordian', function() {
 
 		//Check the parent is already in the tree
 		if (this.allNodes.hasOwnProperty(node.parentID)) {
+
 			//The parent is already in the tree, just add it
 			this.allNodes[node.parentID].addChild(node);
+
 		} else {
 
 			//The parent is not already in the tree
@@ -41,21 +43,24 @@ factory('treeaccordian', function() {
 	};
 
 	TreeAccordian.prototype.getNode = function(nodeID) {
-		console.log(this.allNodes);
-		console.log(this.children);
-		console.log(this);
+		console.log("All Nodes:");
+		console.dir(this.allNodes);
+		console.log("Children");
+		console.dir(this.children);
+		console.log("This");
+		console.dir(this);
 
 		if (this.allNodes.hasOwnProperty(nodeID)) {
 			return this.allNodes[nodeID];
 		}
-		return {}; //throw new Error("No such node");
+		throw new Error("No such node");
 	};
 
 	var AccordianNode = function(name, id, parentID) {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
-		this.id = "node" + id.toString();
+		this.id = id.toString();
 		this.parentID = parentID;
 		this.clickFn = function() {};
 		this.hasChildren = false;
@@ -100,7 +105,7 @@ directive('node', function($compile) {
 		scope: {
 			node: '='
 		},
-		template: "<li ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.expanded }' >{{ node.name }} {{ node.id}} </span></li>",
+		template: "<li ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.expanded }' >{{ node.name }}</span></li>",
 		link: function (scope, element, attrs) {
 			if (Object.keys(scope.node.children).length > 0) {
 				element.append("<accordiancontainer ng-class='{ active: node.expanded }' ng-show='node.expanded' children='node.children'></accordiancontainer>");
