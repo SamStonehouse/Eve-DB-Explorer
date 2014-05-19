@@ -40,11 +40,22 @@ factory('treeaccordian', function() {
 		}
 	};
 
+	TreeAccordian.prototype.getNode = function(nodeID) {
+		console.log(this.allNodes);
+		console.log(this.children);
+		console.log(this);
+
+		if (this.allNodes.hasOwnProperty(nodeID)) {
+			return this.allNodes[nodeID];
+		}
+		return {}; //throw new Error("No such node");
+	};
+
 	var AccordianNode = function(name, id, parentID) {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
-		this.id = id;
+		this.id = "node" + id.toString();
 		this.parentID = parentID;
 		this.clickFn = function() {};
 		this.hasChildren = false;
@@ -89,7 +100,7 @@ directive('node', function($compile) {
 		scope: {
 			node: '='
 		},
-		template: "<li ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.expanded }' >{{ node.name }}</span></li>",
+		template: "<li ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.expanded }' >{{ node.name }} {{ node.id}} </span></li>",
 		link: function (scope, element, attrs) {
 			if (Object.keys(scope.node.children).length > 0) {
 				element.append("<accordiancontainer ng-class='{ active: node.expanded }' ng-show='node.expanded' children='node.children'></accordiancontainer>");

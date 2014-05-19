@@ -12,7 +12,6 @@ app.controller('marketGroupController',	['$scope', 'apiMethods', 'treeaccordian'
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
-	$scope.data.marketGroupAccordian = marketGroupAccordian;
 
 	apiMethods.getMarketGroups(function(result) {
 		for (var i = 0; i < result.length; i++) {
@@ -20,6 +19,13 @@ app.controller('marketGroupController',	['$scope', 'apiMethods', 'treeaccordian'
 			marketGroupAccordian.addNode(accNode, result[i].parentGroupID);
 		}
 	});
+
+
+	$scope.data.marketGroupAccordian = marketGroupAccordian;//.getNode("id9");
+
+	console.dir(Object.keys(marketGroupAccordian.allNodes));
+	console.dir(marketGroupAccordian.getNode(9));
+	// console.dir($scope.data.marketGroupAccordian.allNodes["id9"]);
 }]);
 
 app.controller('typeDisplayController', ['$scope', function($scope) {
