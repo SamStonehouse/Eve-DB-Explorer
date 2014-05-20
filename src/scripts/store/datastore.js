@@ -1,6 +1,6 @@
 angular.module('datastore', ['datastore.marketgroup']).
 
-factory('MarketGroupsManager', ['MarketGroups', 'MarketGroup', function(MarketGroups, MarketGroup) {
+factory('MarketGroupsManager', ['MarketGroups', function(MarketGroups, MarketGroup) {
 
 	var marketGroups = new MarketGroups();
 

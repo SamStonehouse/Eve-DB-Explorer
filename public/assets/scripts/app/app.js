@@ -1,11 +1,12 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore.marketgroup']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'treeaccordian', function($scope, MarketGroupsManager, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'treeaccordian', function($scope, marketGroups, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
 
-	MarketGroupsManager.getMarketGroups(function(marketGroups) {
+	marketGroups.getAllMarketGroups(function(marketGroups) {
+		console.log(marketGroups);
 		for (var i in marketGroups) {
 			if (marketGroups.hasOwnProperty(i)) {
 				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID);
@@ -112,7 +113,7 @@ var SetupQuery = function(urlCreator) {
 };
 angular.module('datastore', ['datastore.marketgroup']).
 
-factory('MarketGroupsManager', ['MarketGroups', 'MarketGroup', function(MarketGroups, MarketGroup) {
+factory('MarketGroupsManager', ['MarketGroups', function(MarketGroups, MarketGroup) {
 
 	var marketGroups = new MarketGroups();
 
@@ -142,14 +143,16 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 	};
 
 	MarketGroups.prototype.getMarketGroupByID = function(marketGroupID, cb) {
-		if (this.marketGroupLoaded(marketGroupID)) {
+		var self = this;
+
+		if (self.marketGroupLoaded(marketGroupID)) {
 			console.log("Already stored this marketgroup");
 			//Check it's not an invalid ID which has already been loaded
-			if (this.marketGroupsByID[marketGroupID] === false) {
+			if (self.marketGroupsByID[marketGroupID] === false) {
 				throw new Error("No such marketGroup");
 			}
 
-			cb(this.marketGroupsByID[marketGroupID]);
+			cb(self.marketGroupsByID[marketGroupID]);
 		} else {
 			//Attempt to load through API
 			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
@@ -158,7 +161,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 					throw new Error("No such marketGroup");
 				} else {
 					console.log("Market Group loaded succesfully");
-					this.setMarketGroupByID(new MarketGroup(result[0]));
+					self.setMarketGroupByID(new MarketGroup(result[0]));
 					cb(marketGroupsByID[marketGroupID]);
 				}
 			});
@@ -178,15 +181,17 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 	};
 
 	MarketGroups.prototype.getAllMarketGroups = function(cb) {
+		var self = this;
+
 		if (this.allMarketGroupsLoaded()) {
 			cb(this.marketGroupsByID);
 		} else {
 			MarketGroupApi.getMarketGroups(function(result) {
 				for (var i = 0; i < result.length; i++) {
-					this.setMarketGroupByID(new MarketGroup(result[i]));
+					self.setMarketGroupByID(new MarketGroup(result[i]));
 				}
-				this.marketGroupsLoaded = true;
-				cb(marketGroups);
+				self.marketGroupsLoaded = true;
+				cb(self.marketGroupsByID);
 			});
 		}
 	};

@@ -18,14 +18,16 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 	};
 
 	MarketGroups.prototype.getMarketGroupByID = function(marketGroupID, cb) {
-		if (this.marketGroupLoaded(marketGroupID)) {
+		var self = this;
+
+		if (self.marketGroupLoaded(marketGroupID)) {
 			console.log("Already stored this marketgroup");
 			//Check it's not an invalid ID which has already been loaded
-			if (this.marketGroupsByID[marketGroupID] === false) {
+			if (self.marketGroupsByID[marketGroupID] === false) {
 				throw new Error("No such marketGroup");
 			}
 
-			cb(this.marketGroupsByID[marketGroupID]);
+			cb(self.marketGroupsByID[marketGroupID]);
 		} else {
 			//Attempt to load through API
 			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
@@ -34,7 +36,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 					throw new Error("No such marketGroup");
 				} else {
 					console.log("Market Group loaded succesfully");
-					this.setMarketGroupByID(new MarketGroup(result[0]));
+					self.setMarketGroupByID(new MarketGroup(result[0]));
 					cb(marketGroupsByID[marketGroupID]);
 				}
 			});
@@ -54,15 +56,17 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 	};
 
 	MarketGroups.prototype.getAllMarketGroups = function(cb) {
+		var self = this;
+
 		if (this.allMarketGroupsLoaded()) {
 			cb(this.marketGroupsByID);
 		} else {
 			MarketGroupApi.getMarketGroups(function(result) {
 				for (var i = 0; i < result.length; i++) {
-					this.setMarketGroupByID(new MarketGroup(result[i]));
+					self.setMarketGroupByID(new MarketGroup(result[i]));
 				}
-				this.marketGroupsLoaded = true;
-				cb(marketGroups);
+				self.marketGroupsLoaded = true;
+				cb(self.marketGroupsByID);
 			});
 		}
 	};
