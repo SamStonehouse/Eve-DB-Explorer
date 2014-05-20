@@ -1,15 +1,15 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore.marketgroup']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroups', 'treeaccordian', function($scope, MarketGroups, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'treeaccordian', function($scope, MarketGroupsManager, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
 
-	MarketGroups.getMarketGroups(function(result) {
-		for (var i in result) {
-			if (result.hasOwnProperty(i)) {
-				var accNode = new treeaccordian.AccordianNode(result[i].name, result[i].id, result[i].parentID);
-				marketGroupAccordian.addNode(accNode, result[i].parentID);
+	MarketGroupsManager.getMarketGroups(function(marketGroups) {
+		for (var i in marketGroups) {
+			if (marketGroups.hasOwnProperty(i)) {
+				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID);
+				marketGroupAccordian.addNode(accNode, marketGroups[i].parentID);
 			}
 		}
 	});

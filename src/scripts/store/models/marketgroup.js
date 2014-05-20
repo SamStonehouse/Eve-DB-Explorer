@@ -1,4 +1,4 @@
-angular.module('datastore.marketgroup', []).
+angular.module('datastore.marketgroup', ["api"]).
 
 factory("MarketGroup", function() {
 	var MarketGroup = function(mgdata) {
@@ -10,31 +10,65 @@ factory("MarketGroup", function() {
 	return MarketGroup;
 }).
 
-factory("MarketGroups", function() {
+factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupApi, MarketGroup) {
 	var MarketGroups = function() {
 		this.marketGroupsByID = {};
 
 		this.marketGroupsLoaded = false;
 	};
 
-	MarketGroups.prototype.getMarketGroupByID = function() {
-		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
-			return this.marketGroupsByID[marketGroupID];
+	MarketGroups.prototype.getMarketGroupByID = function(marketGroupID, cb) {
+		if (this.marketGroupLoaded(marketGroupID)) {
+			console.log("Already stored this marketgroup");
+			//Check it's not an invalid ID which has already been loaded
+			if (this.marketGroupsByID[marketGroupID] === false) {
+				throw new Error("No such marketGroup");
+			}
+
+			cb(this.marketGroupsByID[marketGroupID]);
+		} else {
+			//Attempt to load through API
+			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+				if (result.length === 0) {
+					marketGroupsByID[marketGroupID] = false;
+					throw new Error("No such marketGroup");
+				} else {
+					console.log("Market Group loaded succesfully");
+					this.setMarketGroupByID(new MarketGroup(result[0]));
+					cb(marketGroupsByID[marketGroupID]);
+				}
+			});
 		}
-		
-		throw new Error("No such marketGroup");
 	};
 
 	MarketGroups.prototype.marketGroupLoaded = function(marketGroupID) {
 		return this.marketGroupsByID.hasOwnProperty(marketGroupID);
 	};
 
+	MarketGroups.prototype.allMarketGroupsLoaded = function(){
+		return this.marketGroupsLoaded;
+	};
+
 	MarketGroups.prototype.setMarketGroupByID = function(marketGroup) {
 		this.marketGroupsByID[marketGroup.id] = marketGroup;
 	};
 
+	MarketGroups.prototype.getAllMarketGroups = function(cb) {
+		if (this.allMarketGroupsLoaded()) {
+			cb(this.marketGroupsByID);
+		} else {
+			MarketGroupApi.getMarketGroups(function(result) {
+				for (var i = 0; i < result.length; i++) {
+					this.setMarketGroupByID(new MarketGroup(result[i]));
+				}
+				this.marketGroupsLoaded = true;
+				cb(marketGroups);
+			});
+		}
+	};
+
 	return MarketGroups;
-}).
+}]).
 
 factory("MarketGroupType", function() {
 	var MarketGroupType = function(mgtdata) {
@@ -68,3 +102,36 @@ factory("MarketGroupTypes", function() {
 
 	return MarketGroupTypes;
 });
+
+
+
+var loadByID = function(refObj, APIFn) {
+
+
+	return function(IDs, cb) {
+
+		//If IDs is array, join with comma
+
+		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
+			console.log("Already stored this marketgroup");
+			//Check it's not an invalid ID which has already been loaded
+			if (this.marketGroupsByID[marketGroupID] === false) {
+				throw new Error("No such marketGroup");
+			}
+
+			cb(this.marketGroupsByID[marketGroupID]);
+		} else {
+			//Attempt to load through API
+			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+				if (result.length === 0) {
+					marketGroupsByID[marketGroupID] = false;
+					throw new Error("No such marketGroup");
+				} else {
+					console.log("Market Group loaded succesfully");
+					marketGroupsByID[marketGroupID] = result[0];
+					cb(result[0]);
+				}
+			});
+		}
+	};
+};
