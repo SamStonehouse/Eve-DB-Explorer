@@ -5,40 +5,29 @@ factory('treeaccordian', function() {
 	var TreeAccordian = function() {
 		this.children = [];
 		this.allNodes = {};
-		this.parentlessNodes = {};
+		//this.parentlessNodes = {};
 	};
 
 	TreeAccordian.prototype.addNode = function(node) {
 		//Add to all nodes collection
 		this.allNodes[node.id] = node;
+	};
 
-		if (node.parentID === null) {
-			this.children.push(node);
-		}
+	TreeAccordian.prototype.createTree = function() {
+		for (var i in this.allNodes) {
+			var node = this.allNodes[i];
 
-		//Check the parent is already in the tree
-		if (this.allNodes.hasOwnProperty(node.parentID)) {
+			if (this.allNodes.hasOwnProperty(i)) {
+				var parentID = node.parentID;
 
-			//The parent is already in the tree, just add it
-			this.allNodes[node.parentID].addChild(node);
-
-		} else {
-
-			//The parent is not already in the tree
-			if (!this.parentlessNodes.hasOwnProperty(node.parentID)) {
-				this.parentlessNodes[node.parentID] = [];
+				if (parentID === null) {
+					this.children.push(node);
+				} else if (this.allNodes.hasOwnProperty(parentID)) {
+					this.allNodes[parentID].addChild(node);
+				} else {
+					console.log("No parent, ahh!");
+				}
 			}
-
-			this.parentlessNodes[node.parentID].push(node);
-		}
-
-		//Check there aren't parentless nodes waiting for this node
-		if (this.parentlessNodes.hasOwnProperty(node.id)) {
-			for (var i = 0; i < this.parentlessNodes[node.id]; i++) {
-				node.addChild(this.parentlessNodes[node.parentID]);
-			}
-
-			delete this.parentlessNodes[node.id];
 		}
 	};
 
@@ -49,12 +38,14 @@ factory('treeaccordian', function() {
 		throw new Error("No such node");
 	};
 
-	var AccordianNode = function(name, id, parentID) {
+	var AccordianNode = function(name, id, parentID, data) {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
 		this.id = id;
 		this.parentID = parentID;
+		this.data = data | {};
+
 		this.clickFn = function() {};
 		this.hasChildren = false;
 	};
@@ -70,7 +61,7 @@ factory('treeaccordian', function() {
 
 	AccordianNode.prototype.click = function() {
 		this.expanded = !this.expanded;
-		this.clickFn(this.children);
+		this.clickFn(this);
 	};
 
 	return {

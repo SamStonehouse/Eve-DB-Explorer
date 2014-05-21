@@ -1,18 +1,30 @@
 var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'treeaccordian', function($scope, marketGroups, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'MarketGroupTypesManager', 'treeaccordian', function($scope, marketGroups, marketGroupTypes, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
+	$scope.data.activeMarketGroupTypes = [];
+
+	var nodeSelect = function(node) {
+		marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
+			//$scope.data.activeMarketGroupTypes = types;
+		});
+	};
 
 	marketGroups.getAllMarketGroups(function(marketGroups) {
 		console.log(marketGroups);
 		for (var i in marketGroups) {
 			if (marketGroups.hasOwnProperty(i)) {
-				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID);
+				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID, marketGroups);
+
+				accNode.onClick(nodeSelect);
+
 				marketGroupAccordian.addNode(accNode, marketGroups[i].parentID);
 			}
 		}
+
+		marketGroupAccordian.createTree();
 	});
 
 	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
@@ -114,15 +126,16 @@ var SetupQuery = function(urlCreator) {
 angular.module('datastore', ['datastore.marketgroup']).
 
 factory('MarketGroupsManager', ['MarketGroups', function(MarketGroups, MarketGroup) {
-
 	var marketGroups = new MarketGroups();
 
 	return marketGroups;
 }]).
 
-factory('MarketGroupTypes', function() {
-	
-});
+factory('MarketGroupTypesManager', ['MarketGroupTypes', function(MarketGroupTypes) {
+	var marketGroupTypes = new MarketGroupTypes();
+
+	return marketGroupTypes;
+}]);
 angular.module('datastore.marketgroup', ["api"]).
 
 factory("MarketGroup", function() {
@@ -208,29 +221,45 @@ factory("MarketGroupType", function() {
 	return MarketGroupType;
 }).
 
-factory("MarketGroupTypes", function() {
+factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(MarketGroupApi, MarketGroupType) {
 	var MarketGroupTypes = function() {
-
+		this.marketGroupTypes = {};
 	};
 
-	MarketGroupTypes.prototype.getMarketGroupTypesByMarketGroupID = function() {
+	MarketGroupTypes.prototype.getMarketGroupTypesByIDs = function(marketGroupID, cb) {
+		var self = this;
 
+		if (self.marketGroupTypesLoaded(marketGroupID)) {
+
+			//Check it's not an invalid ID which has already been loaded
+			cb(self.marketGroupTypes[marketGroupID]);
+
+		} else {
+			//Attempt to load through API
+			MarketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
+				var types = [];
+
+				for (var i = 0; i < result.length; i++) {
+					types.push(new MarketGroupType(result[i].typeID, result[i].typeName));
+				}
+
+				cb(types);
+				self.setMarketGroupTypes(marketGroupID, types);
+			});
+		}
 	};
 
-	MarketGroupTypes.prototype.getAllMarketGroupTypes = function() {
-
+	MarketGroupTypes.prototype.marketGroupTypesLoaded = function(marketGroupID) {
+		return this.marketGroupTypes.hasOwnProperty(marketGroupID);
 	};
 
-	MarketGroupTypes.prototype.setMarketGroupTypesByParentID = function(parentID, types) {
 
-	};
-
-	MarketGroupTypes.prototype.setAllMarketGroupTypes = function() {
-
+	MarketGroupTypes.prototype.setMarketGroupTypes = function(marketGroupID, types) {
+		this.marketGroupTypes[marketGroupID] = types;
 	};
 
 	return MarketGroupTypes;
-});
+}]);
 
 
 
@@ -271,40 +300,29 @@ factory('treeaccordian', function() {
 	var TreeAccordian = function() {
 		this.children = [];
 		this.allNodes = {};
-		this.parentlessNodes = {};
+		//this.parentlessNodes = {};
 	};
 
 	TreeAccordian.prototype.addNode = function(node) {
 		//Add to all nodes collection
 		this.allNodes[node.id] = node;
+	};
 
-		if (node.parentID === null) {
-			this.children.push(node);
-		}
+	TreeAccordian.prototype.createTree = function() {
+		for (var i in this.allNodes) {
+			var node = this.allNodes[i];
 
-		//Check the parent is already in the tree
-		if (this.allNodes.hasOwnProperty(node.parentID)) {
+			if (this.allNodes.hasOwnProperty(i)) {
+				var parentID = node.parentID;
 
-			//The parent is already in the tree, just add it
-			this.allNodes[node.parentID].addChild(node);
-
-		} else {
-
-			//The parent is not already in the tree
-			if (!this.parentlessNodes.hasOwnProperty(node.parentID)) {
-				this.parentlessNodes[node.parentID] = [];
+				if (parentID === null) {
+					this.children.push(node);
+				} else if (this.allNodes.hasOwnProperty(parentID)) {
+					this.allNodes[parentID].addChild(node);
+				} else {
+					console.log("No parent, ahh!");
+				}
 			}
-
-			this.parentlessNodes[node.parentID].push(node);
-		}
-
-		//Check there aren't parentless nodes waiting for this node
-		if (this.parentlessNodes.hasOwnProperty(node.id)) {
-			for (var i = 0; i < this.parentlessNodes[node.id]; i++) {
-				node.addChild(this.parentlessNodes[node.parentID]);
-			}
-
-			delete this.parentlessNodes[node.id];
 		}
 	};
 
@@ -315,12 +333,14 @@ factory('treeaccordian', function() {
 		throw new Error("No such node");
 	};
 
-	var AccordianNode = function(name, id, parentID) {
+	var AccordianNode = function(name, id, parentID, data) {
 		this.children = {};
 		this.expanded = false;
 		this.name = name;
 		this.id = id;
 		this.parentID = parentID;
+		this.data = data | {};
+
 		this.clickFn = function() {};
 		this.hasChildren = false;
 	};
@@ -336,7 +356,7 @@ factory('treeaccordian', function() {
 
 	AccordianNode.prototype.click = function() {
 		this.expanded = !this.expanded;
-		this.clickFn(this.children);
+		this.clickFn(this);
 	};
 
 	return {
