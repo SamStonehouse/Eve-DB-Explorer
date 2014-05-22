@@ -6,7 +6,7 @@ block header
 block sidebar
 	div(ng-controller="marketGroupController")
 		accordiancontainer(children="data.marketGroupAccordian.children")
-		div {{ data.activeMarketGroupTypes }}
+		div(ng-repeat="type in data.activeMarketGroupTypes") {{ type.name }}
 
 block main
 	div(ng-controller="typeDisplayController")

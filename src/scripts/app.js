@@ -8,7 +8,7 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 
 	var nodeSelect = function(node) {
 		marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
-			//$scope.data.activeMarketGroupTypes = types;
+			$scope.data.activeMarketGroupTypes = types;
 		});
 	};
 

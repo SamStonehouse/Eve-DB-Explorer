@@ -102,7 +102,7 @@ factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(Marke
 				var types = [];
 
 				for (var i = 0; i < result.length; i++) {
-					types.push(new MarketGroupType(result[i].typeID, result[i].typeName));
+					types.push(new MarketGroupType(result[i]));
 				}
 
 				cb(types);
