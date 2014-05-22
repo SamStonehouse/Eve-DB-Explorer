@@ -7,16 +7,19 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.activeMarketGroupTypes = [];
 
 	var nodeSelect = function(node) {
-		marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
-			$scope.data.activeMarketGroupTypes = types;
-		});
+		console.log(node);
+		if (node.nodeData.hasTypes) {
+			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
+				$scope.data.activeMarketGroupTypes = types;
+			});
+		}
 	};
 
 	marketGroups.getAllMarketGroups(function(marketGroups) {
 		console.log(marketGroups);
 		for (var i in marketGroups) {
 			if (marketGroups.hasOwnProperty(i)) {
-				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID, marketGroups);
+				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID, marketGroups[i]);
 
 				accNode.onClick(nodeSelect);
 
@@ -35,41 +38,10 @@ app.controller('typeDisplayController', ['$scope', function($scope) {
 }]);
 angular.module('api', []).
 
-factory('apiMethods', function($http) {
-	return {
-		getMarketGroups: function(cb) {
-			var url = "http://localhost:8080/api/inv/marketgroups?fields=39&callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Marketgroups response");
-				cb(result.data.result);
-			});
-		},
-		getParentMarketGroups: function() {
-
-			var url = "http://localhost:8080/api/inv/marketgroups/parent/null?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Parent Market Group Response");
-				return result.data;
-			});
-		},
-		getTypesByMarketGroupID: function(mgID) {
-
-			var url = "http://localhost:8080/api/inv/types/marketgroup/" + mgID + "?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Types in market group by market group ID response");
-				return result.data;
-			});
-		}
-	};
-}).
-
 factory('MarketGroupApi', function($http) {
 	return {
 		getMarketGroups: function(cb) {
-			var url = "http://localhost:8080/api/inv/marketgroups?fields=39&callback=JSON_CALLBACK";
+			var url = "http://localhost:8080/api/inv/marketgroups?callback=JSON_CALLBACK";
 
 			return $http.jsonp(url).then(function(result) {
 				console.log("Marketgroups response");
@@ -143,6 +115,7 @@ factory("MarketGroup", function() {
 		this.id = mgdata.marketGroupID;
 		this.name = mgdata.marketGroupName;
 		this.parentID = mgdata.parentGroupID;
+		this.hasTypes = mgdata.hasTypes;
 	};
 
 	return MarketGroup;
@@ -339,7 +312,7 @@ factory('treeaccordian', function() {
 		this.name = name;
 		this.id = id;
 		this.parentID = parentID;
-		this.data = data | {};
+		this.nodeData = data;
 
 		this.clickFn = function() {};
 		this.hasChildren = false;

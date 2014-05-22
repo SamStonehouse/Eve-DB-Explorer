@@ -44,7 +44,7 @@ factory('treeaccordian', function() {
 		this.name = name;
 		this.id = id;
 		this.parentID = parentID;
-		this.data = data | {};
+		this.nodeData = data;
 
 		this.clickFn = function() {};
 		this.hasChildren = false;

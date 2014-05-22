@@ -5,6 +5,7 @@ factory("MarketGroup", function() {
 		this.id = mgdata.marketGroupID;
 		this.name = mgdata.marketGroupName;
 		this.parentID = mgdata.parentGroupID;
+		this.hasTypes = mgdata.hasTypes;
 	};
 
 	return MarketGroup;

@@ -7,16 +7,19 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.activeMarketGroupTypes = [];
 
 	var nodeSelect = function(node) {
-		marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
-			$scope.data.activeMarketGroupTypes = types;
-		});
+		console.log(node);
+		if (node.nodeData.hasTypes) {
+			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
+				$scope.data.activeMarketGroupTypes = types;
+			});
+		}
 	};
 
 	marketGroups.getAllMarketGroups(function(marketGroups) {
 		console.log(marketGroups);
 		for (var i in marketGroups) {
 			if (marketGroups.hasOwnProperty(i)) {
-				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID, marketGroups);
+				var accNode = new treeaccordian.AccordianNode(marketGroups[i].name, marketGroups[i].id, marketGroups[i].parentID, marketGroups[i]);
 
 				accNode.onClick(nodeSelect);
 
