@@ -6,17 +6,68 @@ html, body {
 	font-family: Arial;
 }
 
-.wrapper {
-  display: flex;
-  flex-flow: row wrap;
+html, body, .wrapper {
+	height: 100%;
+	width: 100%;
+	max-height: 100%;
 }
 
-#header, #main, #sidebar, #footer {
-  flex: 1 100%;
-}
-
-#main, #header, #footer {
+#header {
+	height: 60px;
+	line-height: 40px;
 	padding: 10px;
+}
+
+#footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	height: 40px;
+	line-height: 20px;
+	padding: 10px;
+}
+
+#sidebar {
+	position: absolute;
+	top: 60px;
+	left: 0;
+	bottom: 40px;
+	width: 500px;
+}
+
+.sidebar-container {
+	height: 100%;
+}
+
+.sidebar-left {
+	float: left;
+	width: 250px;
+	height: 100%;
+	overflow-y: scroll;
+
+	/* Let's get this party started */
+	&::-webkit-scrollbar {
+	    width: 4px;
+	}
+	 
+	/* Track */
+	&::-webkit-scrollbar-track {
+		background-color: #eee;
+	}
+	 
+	/* Handle */
+	&::-webkit-scrollbar-thumb {
+	    -webkit-border-radius: 10px;
+		background-color: #ddd;
+	}
+}
+
+.sidebar-right {
+	float: left;
+	width: 250px;
+	height: 100%;
 }
 
 .accordian {
@@ -36,6 +87,10 @@ html, body {
 			display: block;
 		}
 	}
+}
+
+.node-name {
+	text-overflow:ellipsis;
 }
 
 .accordian {

@@ -4,9 +4,14 @@ block header
 	include ../includes/header
 
 block sidebar
-	div(ng-controller="marketGroupController")
-		accordiancontainer(children="data.marketGroupAccordian.children")
-		div(ng-repeat="type in data.activeMarketGroupTypes") {{ type.name }}
+	div(ng-controller="marketGroupController").sidebar-container
+		.sidebar-left
+			accordiancontainer(children="data.marketGroupAccordian.children")
+		.sidebar-right
+			.upper-sidebar-right
+				div(ng-repeat="type in data.activeMarketGroupTypes") {{ type.name }}
+			.lower-sidebar-right
+				
 
 block main
 	div(ng-controller="typeDisplayController")

@@ -14,6 +14,7 @@
 html, body {
 	background-color: @uscm;
 	color: @bc;
+	font-size: 12px;
 }
 
 
@@ -58,10 +59,8 @@ html, body, #footer {
 
 .accordian {
 
-	.node-name.active {
-		:before {
-			content: "\f107";
-		}
+	.node-name.expanded {
+		text-decoration: underline;
 	}
 
 
@@ -74,8 +73,8 @@ html, body, #footer {
 		}
 
 		.node-name:hover {
-			background-color: @mc;
-			color: #fff;
+			background-color: #fff;
+			//color: #fff;
 		}
 	}
 }

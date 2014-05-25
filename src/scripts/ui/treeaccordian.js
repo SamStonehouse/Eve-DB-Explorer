@@ -48,6 +48,7 @@ factory('treeaccordian', function() {
 
 		this.clickFn = function() {};
 		this.hasChildren = false;
+		this.active = false;
 	};
 
 	AccordianNode.prototype.addChild = function(child) {
@@ -61,6 +62,7 @@ factory('treeaccordian', function() {
 
 	AccordianNode.prototype.click = function() {
 		this.expanded = !this.expanded;
+		this.active = this.expanded && this.hasChildren;
 		this.clickFn(this);
 	};
 
@@ -89,10 +91,10 @@ directive('node', function($compile) {
 		scope: {
 			node: '='
 		},
-		template: "<li ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.expanded }' >{{ node.name }}</span></li>",
+		template: "<li class='node' ng-click='node.click(); $event.stopPropagation();'><span class='node-name' ng-class='{ haschildren: node.hasChildren, expanded: node.active }' >{{ node.name }}</span></li>",
 		link: function (scope, element, attrs) {
 			if (Object.keys(scope.node.children).length > 0) {
-				element.append("<accordiancontainer ng-class='{ active: node.expanded }' ng-show='node.expanded' children='node.children'></accordiancontainer>");
+				element.append("<accordiancontainer ng-class='{ active: node.active }' ng-show='node.expanded' children='node.children'></accordiancontainer>");
 			}
 			$compile(element.contents())(scope);
 		}
