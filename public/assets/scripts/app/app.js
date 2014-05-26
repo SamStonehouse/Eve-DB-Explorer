@@ -1,10 +1,12 @@
 var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'MarketGroupTypesManager', 'treeaccordian', function($scope, marketGroups, marketGroupTypes, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'MarketGroupTypesManager', 'TypesManager', 'treeaccordian', function($scope, marketGroups, marketGroupTypes, typesManager, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
 	$scope.data.activeMarketGroupTypes = [];
+
+	$scope.data.activeType = {};
 
 	var nodeSelect = function(node) {
 		console.log(node);
@@ -31,6 +33,14 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	});
 
 	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
+
+	$scope.typeSelect = function(typeID) {
+		typesManager.getTypeByID(typeID, function(type) {
+			console.log("Type response");
+			console.log(type);
+			$scope.data.activeType = type;
+		});
+	};
 }]);
 
 app.controller('typeDisplayController', ['$scope', function($scope) {
@@ -87,15 +97,29 @@ factory('MarketGroupApi', function($http) {
 			});
 		}
 	};
+}).
+
+
+factory('TypeApi', function($http) {
+	return {
+		getTypeByID: function(typeID, cb) {
+
+			var url = "http://localhost:8080/api/inv/types/full/" + typeID + "?callback=JSON_CALLBACK";
+
+			return $http.jsonp(url).then(function(result) {
+				console.log("Market group by ID response");
+
+				if (result.data.error) {
+					throw new Error(result.data.error.message);
+				}
+
+				cb(result.data.result);
+			});
+		}
+	};
 });
 
-var SetupQuery = function(urlCreator) {
-
-	return function() {
-
-	}
-};
-angular.module('datastore', ['datastore.marketgroup']).
+angular.module('datastore', ['datastore.marketgroup', 'datastore.type']).
 
 factory('MarketGroupsManager', ['MarketGroups', function(MarketGroups, MarketGroup) {
 	var marketGroups = new MarketGroups();
@@ -107,6 +131,12 @@ factory('MarketGroupTypesManager', ['MarketGroupTypes', function(MarketGroupType
 	var marketGroupTypes = new MarketGroupTypes();
 
 	return marketGroupTypes;
+}]).
+
+factory('TypesManager', ['Types', function(Types) {
+	var types = new Types();
+
+	return types;
 }]);
 angular.module('datastore.marketgroup', ["api"]).
 
@@ -266,6 +296,57 @@ var loadByID = function(refObj, APIFn) {
 		}
 	};
 };
+angular.module('datastore.type', ["api"]).
+
+factory("Type", function() {
+	var Type = function(typeData) {
+		this.id = typeData.typeID;
+		this.name = typeData.typeName;
+		this.description = typeData.description;
+		this.attributes = typeData.attributes;
+	};
+
+	return Type;
+}).
+
+factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
+	var Types = function() {
+		this.typesByID = {};
+	};
+
+	Types.prototype.getTypeByID = function(typeID, cb) {
+		var self = this;
+
+		if (self.typeLoaded(typeID)) {
+			if (self.typesByID[typeID] === false) {
+				throw new Error("No such type with id: " + typeID);
+			} else {
+				cb(self.typesByID[typeID]);
+			}
+		} else {
+			TypeApi.getTypeByID(typeID, function(result) {
+				if (result.length === 0) {
+					self.setTypeByID(typeID, false);
+					throw new Error("No such type with id: " + typeID);
+				} else {
+					var type = new Type(result[0]);
+					self.setTypeByID(type.id, type);
+					cb(type);
+				}
+			});
+		}
+	};
+
+	Types.prototype.typeLoaded = function(typeID) {
+		return this.typesByID.hasOwnProperty(typeID);
+	};
+
+	Types.prototype.setTypeByID = function(typeID, type) {
+		this.typesByID[typeID] = type;
+	};
+
+	return Types;
+}]);
 angular.module('ui.treeaccordian', []).
 
 factory('treeaccordian', function() {

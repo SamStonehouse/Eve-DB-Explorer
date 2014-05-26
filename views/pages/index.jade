@@ -9,9 +9,13 @@ block sidebar
 			accordiancontainer(children="data.marketGroupAccordian.children")
 		.sidebar-right
 			.upper-sidebar-right
-				div(ng-repeat="type in data.activeMarketGroupTypes") {{ type.name }}
+				div(ng-repeat="type in data.activeMarketGroupTypes", ng-click="typeSelect(type.id)").sidebar-selectable {{ type.name }}
 			.lower-sidebar-right
-				
+				h5 {{ data.activeType.name }}
+				p {{ data.activeType.id }}
+				p {{ data.activeType.description }}
+
+				{{ data.activeType }}
 
 block main
 	div(ng-controller="typeDisplayController")

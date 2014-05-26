@@ -7434,8 +7434,6 @@ html,
 body {
   margin: 0;
   padding: 0;
-  font-size: 14px;
-  font-family: Arial;
 }
 html,
 body,
@@ -7443,6 +7441,19 @@ body,
   height: 100%;
   width: 100%;
   max-height: 100%;
+}
+/* Let's get this party started */
+::-webkit-scrollbar {
+  width: 4px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  background-color: #eee;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 10px;
+  background-color: #ccc;
 }
 #header {
   height: 60px;
@@ -7473,19 +7484,6 @@ body,
   width: 250px;
   height: 100%;
   overflow-y: scroll;
-  /* Let's get this party started */
-  /* Track */
-  /* Handle */
-}
-.sidebar-left::-webkit-scrollbar {
-  width: 4px;
-}
-.sidebar-left::-webkit-scrollbar-track {
-  background-color: #eee;
-}
-.sidebar-left::-webkit-scrollbar-thumb {
-  -webkit-border-radius: 10px;
-  background-color: #ddd;
 }
 .sidebar-right {
   float: left;
@@ -7502,10 +7500,8 @@ body,
   padding: 0;
   margin: 0;
 }
-.accordian li .node-name {
-  height: 20px;
-  line-height: 20px;
-  display: block;
+.sidebar-selectable {
+  padding: 0 5px;
 }
 .node-name {
   text-overflow: ellipsis;
@@ -7525,11 +7521,22 @@ body,
 .accordian li li li li li .node-name {
   padding-left: 25px;
 }
+.upper-sidebar-right {
+  overflow-y: scroll;
+  height: 50%;
+}
+.lower-sidebar-right {
+  overflow-y: scroll;
+  height: 50%;
+  padding: 5px;
+}
 html,
 body {
   background-color: #f4f4f4;
   color: #333333;
   font-size: 12px;
+  line-height: 1.4;
+  font-family: Arial;
 }
 #header {
   background-color: #172c41;
@@ -7543,17 +7550,11 @@ body {
   background-color: #f4f4f4;
 }
 #footer {
-  background-color: #f4f4f4;
+  background-color: #ddd;
   color: #333333;
 }
 .wrapper {
   background-color: #fff;
-}
-html,
-body,
-#footer {
-  background-color: #f4f4f4;
-  color: #333333;
 }
 #footer {
   color: #888;
@@ -7566,12 +7567,23 @@ body,
   text-decoration: underline;
 }
 .accordian li {
-  cursor: pointer;
   position: relative;
 }
 .accordian li .node-name {
   display: block;
 }
-.accordian li .node-name:hover {
+.node-name,
+.sidebar-selectable {
+  height: 20px;
+  line-height: 20px;
+  display: block;
+  user-select: none;
+  cursor: pointer;
+}
+.node-name:hover,
+.sidebar-selectable:hover {
   background-color: #fff;
+}
+.lower-sidebar-right {
+  background-color: #ddd;
 }

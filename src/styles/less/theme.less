@@ -14,7 +14,10 @@
 html, body {
 	background-color: @uscm;
 	color: @bc;
+
 	font-size: 12px;
+	line-height: 1.4;
+	font-family: Arial;
 }
 
 
@@ -33,19 +36,12 @@ html, body {
 }
 
 #footer {
-	background-color: @uscm;
+	background-color: #ddd;
 	color: @bc;
 }
 
 .wrapper {
 	background-color: #fff;
-}
-
-
-
-html, body, #footer {
-	background-color: @uscm;
-	color: @bc;
 }
 
 #footer {
@@ -65,16 +61,29 @@ html, body, #footer {
 
 
 	li {
-		cursor: pointer;
 		position: relative;
 
 		.node-name {
 			display: block;
 		}
 
-		.node-name:hover {
-			background-color: #fff;
-			//color: #fff;
-		}
+		
 	}
+}
+
+.node-name, .sidebar-selectable {
+	height: 20px;
+	line-height: 20px;
+	display: block;
+	user-select: none;
+	cursor: pointer;
+
+	&:hover {
+		background-color: #fff;
+	}
+}
+
+
+.lower-sidebar-right {
+	background-color: #ddd;
 }

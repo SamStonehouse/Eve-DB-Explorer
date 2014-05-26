@@ -49,11 +49,24 @@ factory('MarketGroupApi', function($http) {
 			});
 		}
 	};
+}).
+
+
+factory('TypeApi', function($http) {
+	return {
+		getTypeByID: function(typeID, cb) {
+
+			var url = "http://localhost:8080/api/inv/types/full/" + typeID + "?callback=JSON_CALLBACK";
+
+			return $http.jsonp(url).then(function(result) {
+				console.log("Market group by ID response");
+
+				if (result.data.error) {
+					throw new Error(result.data.error.message);
+				}
+
+				cb(result.data.result);
+			});
+		}
+	};
 });
-
-var SetupQuery = function(urlCreator) {
-
-	return function() {
-
-	}
-};
