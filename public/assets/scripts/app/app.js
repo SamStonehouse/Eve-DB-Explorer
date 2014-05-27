@@ -138,6 +138,68 @@ factory('TypesManager', ['Types', function(Types) {
 
 	return types;
 }]);
+angular.module('datastore.attribute', ["api"]).
+
+factory('Attribute', function() {
+	var Attribute = function(attributeData) {
+		this.id = attributeData.attributeID;
+		this.name = attributeData.attributeName;
+		this.value = attributeData.value;
+	};
+
+	return Attribute;
+}).
+
+factory('Attributes', ['Attribute', function(Attribute) {
+	var Attributes = function() {
+		this.attributesByID = {};
+		this.attributesByName = {};
+	};
+
+	Attributes.prototype.addAttribute = function(attributeData) {
+		var newAttr = new Attribute(attributeData);
+
+		console.log("New Attribute");
+		console.dir(newAttr);
+
+		this.attributesByID[newAttr.id] = newAttr;
+		this.attributesByName[newAttr.name] = newAttr;
+	};
+
+	Attributes.prototype.hasAttributeWithID = function(attributeID) {
+		if (this.attributesByID.hasOwnProperty(attributesID)) {
+			return true;
+		}
+
+		return false;
+	};
+
+	Attributes.prototype.getAttributeByID = function(attributeID) {
+		if (this.hasAttributeWithID(attributeID)) {
+			return this.attributesByID[attributeID];
+		}
+
+		return null;
+	};
+
+	Attributes.prototype.hasAttributeWithName = function(attributeName) {
+		if (this.attributesByName.hasOwnProperty(attributeName)) {
+			return true;
+		}
+
+		return false;
+	};
+
+	Attributes.prototype.getAttributeByName = function(attributeName) {
+		if (this.hasAttributeWithName(attributeName)) {
+			return this.attributesByName[attributeName];
+		}
+
+		return null;
+	};
+
+	return Attributes;
+}]);
 angular.module('datastore.marketgroup', ["api"]).
 
 factory("MarketGroup", function() {
@@ -296,18 +358,99 @@ var loadByID = function(refObj, APIFn) {
 		}
 	};
 };
-angular.module('datastore.type', ["api"]).
+angular.module('datastore.skills', ["api"]).
 
-factory("Type", function() {
+factory("Skill", function() {
+
+	var REQ_SKILL_1_ID = 182;
+	var REQ_SKILL_2_ID = 183;
+	var REQ_SKILL_3_ID = 184;
+
+	var REQ_LEVEL_1_ID = 277;
+	var REQ_LEVEL_2_ID = 277;
+	var REQ_LEVEL_3_ID = 277;
+
+	var Skill = function(typeData) {
+		this.name = typeData.typeName;
+		this.id = typeData.typeID;
+
+		this.requirements = [];
+
+	};
+
+	Skill.prototype.parseAttribute = function(attributes, skillAttributeID, levelAttributeID) {
+		if (attributes.hasOwnProperty(skillAttributeID)) {
+			this.addRequirement(attributes[skillAttributeID].value, attributes[levelAttributeID].value);
+		}
+	};
+
+	Skill.prototype.addRequirement = function(skillID, level) {
+		this.requirements[skill.id] = {skillID: skillID, level: level, skill: {}};
+	};
+
+	Skill.prototype.addSkillReference = function(skill) {
+		this.requirements[skill.id].skill = skill;
+	};
+
+
+	return Skill;
+}).
+
+factory("SkillTree", function() {
+	var SkillTree = function() {
+		this.skills = {};
+	};
+
+	SkillTree.prototype.addSkill = function(skill) {
+		this.skills[skill.id] = skill;
+	};
+
+	SkillTree.prototype.setupTree = function() {
+		for (var skillID in this.skills) {
+			if (this.skills.hasOwnProperty(skillID)) {
+
+				var currentSkill = this.skills[skillID];
+				var currentSkillReqs = currentSkill.requirements;
+
+				for (var i = 0; i < currentSkillReqs.length; i++) {
+
+					if (this.skills.hasOwnProperty(currentSkillReqs[i].skillID)) {
+						currentSkill.addSkillReference(this.skills[currentSkillReqs[i].skillID]);
+					} else {
+						console.log("No skill found for skill requirement for: " + currentSkill.name + "; req skill ID: " + currentSkillReqs[i].skillID);
+					}
+		
+				}
+			}
+		}
+	};
+
+	SkillTree.prototype.loadSkills = function() {
+
+	};
+
+	return SkillTree;
+});
+angular.module('datastore.type', ['datastore.attribute', 'api']).
+
+factory("Type", ["Attributes", function(Attributes) {
 	var Type = function(typeData) {
 		this.id = typeData.typeID;
 		this.name = typeData.typeName;
 		this.description = typeData.description;
-		this.attributes = typeData.attributes;
+
+		//Create and populate attributes
+		this.attributes = new Attributes();
+
+		for (var i = 0; i < typeData.attributes. length; i++) {
+			this.attributes.addAttribute(typeData.attributes[i]);
+		}
 	};
 
+
+
 	return Type;
-}).
+}]).
 
 factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
 	var Types = function() {
@@ -347,6 +490,11 @@ factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
 
 	return Types;
 }]);
+angular.module('ui.sidebar.attributes', []).
+
+factory('attributesDisplay', function() {
+
+});
 angular.module('ui.treeaccordian', []).
 
 factory('treeaccordian', function() {

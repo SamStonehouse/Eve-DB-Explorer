@@ -1,15 +1,23 @@
-angular.module('datastore.type', ["api"]).
+angular.module('datastore.type', ['datastore.attribute', 'api']).
 
-factory("Type", function() {
+factory("Type", ["Attributes", function(Attributes) {
 	var Type = function(typeData) {
 		this.id = typeData.typeID;
 		this.name = typeData.typeName;
 		this.description = typeData.description;
-		this.attributes = typeData.attributes;
+
+		//Create and populate attributes
+		this.attributes = new Attributes();
+
+		for (var i = 0; i < typeData.attributes. length; i++) {
+			this.attributes.addAttribute(typeData.attributes[i]);
+		}
 	};
 
+
+
 	return Type;
-}).
+}]).
 
 factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
 	var Types = function() {
