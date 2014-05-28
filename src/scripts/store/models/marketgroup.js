@@ -1,4 +1,4 @@
-angular.module('datastore.marketgroup', ["api"]).
+angular.module('models.marketgroup', ["api"]).
 
 factory("MarketGroup", function() {
 	var MarketGroup = function(mgdata) {

@@ -1,4 +1,4 @@
-angular.module('datastore.attribute', ["api"]).
+angular.module('models.attribute', ["api"]).
 
 factory('Attribute', function() {
 	var Attribute = function(attributeData) {
@@ -18,9 +18,6 @@ factory('Attributes', ['Attribute', function(Attribute) {
 
 	Attributes.prototype.addAttribute = function(attributeData) {
 		var newAttr = new Attribute(attributeData);
-
-		console.log("New Attribute");
-		console.dir(newAttr);
 
 		this.attributesByID[newAttr.id] = newAttr;
 		this.attributesByName[newAttr.name] = newAttr;

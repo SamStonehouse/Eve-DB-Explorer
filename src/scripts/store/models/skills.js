@@ -1,4 +1,4 @@
-angular.module('datastore.skills', ["api"]).
+angular.module('models.skill', ["api"]).
 
 factory("Skill", function() {
 

@@ -46,6 +46,13 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 app.controller('typeDisplayController', ['$scope', function($scope) {
 
 }]);
+angular.module('Init', []).
+
+factory('init', function() {
+
+	//Load types in group skills
+	
+});
 angular.module('api', []).
 
 factory('MarketGroupApi', function($http) {
@@ -138,7 +145,7 @@ factory('TypesManager', ['Types', function(Types) {
 
 	return types;
 }]);
-angular.module('datastore.attribute', ["api"]).
+angular.module('models.attribute', ["api"]).
 
 factory('Attribute', function() {
 	var Attribute = function(attributeData) {
@@ -158,9 +165,6 @@ factory('Attributes', ['Attribute', function(Attribute) {
 
 	Attributes.prototype.addAttribute = function(attributeData) {
 		var newAttr = new Attribute(attributeData);
-
-		console.log("New Attribute");
-		console.dir(newAttr);
 
 		this.attributesByID[newAttr.id] = newAttr;
 		this.attributesByName[newAttr.name] = newAttr;
@@ -200,7 +204,7 @@ factory('Attributes', ['Attribute', function(Attribute) {
 
 	return Attributes;
 }]);
-angular.module('datastore.marketgroup', ["api"]).
+angular.module('models.marketgroup', ["api"]).
 
 factory("MarketGroup", function() {
 	var MarketGroup = function(mgdata) {
@@ -358,7 +362,7 @@ var loadByID = function(refObj, APIFn) {
 		}
 	};
 };
-angular.module('datastore.skills', ["api"]).
+angular.module('models.skill', ["api"]).
 
 factory("Skill", function() {
 
@@ -431,7 +435,7 @@ factory("SkillTree", function() {
 
 	return SkillTree;
 });
-angular.module('datastore.type', ['datastore.attribute', 'api']).
+angular.module('models.type', ['datastore.attribute', 'api']).
 
 factory("Type", ["Attributes", function(Attributes) {
 	var Type = function(typeData) {
