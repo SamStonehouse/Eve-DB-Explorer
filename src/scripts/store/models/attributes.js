@@ -40,19 +40,13 @@ factory('Attributes', ['Attribute', function(Attribute) {
 	};
 
 	Attributes.prototype.hasAttributeWithName = function(attributeName) {
-		if (this.attributesByName.hasOwnProperty(attributeName)) {
-			return true;
-		}
+		return this.attributesByName.hasOwnProperty(attributeName);
 
 		return false;
 	};
 
 	Attributes.prototype.getAttributeByName = function(attributeName) {
-		if (this.hasAttributeWithName(attributeName)) {
-			return this.attributesByName[attributeName];
-		}
-
-		return null;
+		return this.hasAttributeWithName(attributeName);
 	};
 
 	return Attributes;
