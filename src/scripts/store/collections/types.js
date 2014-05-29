@@ -51,7 +51,7 @@ factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
 		//Add all types in this group to the type by id reference too
 		for (var i = 0; i < groupTypes.length; i++) {
 			if (this.typeLoaded.hasOwnProperty(gp)) {
-				this.setTypeByID(groupTypes[gp].id, new Type(groupTypes[gp]));
+				this.setTypeByID(groupTypes[gp].id, new Type(groupTypes[gp]))	;
 				typesInGroup[groupID] .push();
 			}
 		}
