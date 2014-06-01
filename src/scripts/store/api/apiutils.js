@@ -1,18 +1,20 @@
-angular.module('apiutils', []).
+angular.module('api.utilities', []).
 
-factory("ApiUtilities", function() {
+factory("apiUtilities", ['$http', function($http) {
 	
-	var baseURL = "http://localhost:8000";
+	var baseURL = "http://localhost:8080";
 
-	var apiCall = function(url, cb) {
-		var responsePromise = $http.jsonp(url, {callback: JSON_CALLBACK});
+	var jsonpExtension = "callback=JSON_CALLBACK";
+
+	var callApi = function(url, cb) {
+		var responsePromise = $http.jsonp(baseURL + url + '?' + jsonpExtension);
 
 		responsePromise.success(function(result) {
-			if (result.data.error) {
-				throw new Error(result.data.error.message);
+			if (result && result.error) {
+				throw new Error(result.error.message);
 			}
-
-			cb(result.data.result);
+			
+			cb(result.result);
 		});
 
 		responsePromise.error(function(result) {
@@ -22,6 +24,6 @@ factory("ApiUtilities", function() {
 
 	return {
 		baseURL: baseURL,
-		apiCall: apiCall
+		callApi: callApi
 	};
-});
+}]);

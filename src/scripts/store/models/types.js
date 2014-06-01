@@ -1,4 +1,4 @@
-angular.module('models.type', ['datastore.attribute', 'api']).
+angular.module('models.type', ['models.attribute']).
 
 factory("Type", ["Attributes", function(Attributes) {
 	var Type = function(typeData) {

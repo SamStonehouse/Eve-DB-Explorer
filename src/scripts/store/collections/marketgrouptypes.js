@@ -1,6 +1,6 @@
-angular.module('collections.marketgrouptypes', ["api"]).
+angular.module('collections.marketgrouptypes', ["api.marketgroups"]).
 
-factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(MarketGroupApi, MarketGroupType) {
+factory("MarketGroupTypes", ["marketGroupApi", "MarketGroupType", function(marketGroupApi, MarketGroupType) {
 	var MarketGroupTypes = function() {
 		this.marketGroupTypes = {};
 	};
@@ -15,7 +15,7 @@ factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(Marke
 
 		} else {
 			//Attempt to load through API
-			MarketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
+			marketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
 				var types = [];
 
 				for (var i = 0; i < result.length; i++) {
@@ -38,4 +38,4 @@ factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(Marke
 	};
 
 	return new MarketGroupTypes();
-});
+}]);

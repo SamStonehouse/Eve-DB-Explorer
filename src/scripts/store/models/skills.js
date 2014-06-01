@@ -1,4 +1,4 @@
-angular.module('models.skill', ["api"]).
+angular.module('models.skill', []).
 
 factory("Skill", function() {
 

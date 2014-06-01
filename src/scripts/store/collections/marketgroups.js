@@ -1,6 +1,6 @@
-angular.module('collections.marketgroups', ['api', 'models.marketgroup']).
+angular.module('collections.marketgroups', ['api.marketgroups', 'models.marketgroup']).
 
-factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupApi, MarketGroup) {
+factory("MarketGroups", ["marketGroupApi", "MarketGroup", function(marketGroupApi, MarketGroup) {
 
 	var MarketGroups = function() {
 		this.marketGroupsByID = {};
@@ -21,7 +21,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 			cb(self.marketGroupsByID[marketGroupID]);
 		} else {
 			//Attempt to load through API
-			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+			marketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
 				if (result.length === 0) {
 					marketGroupsByID[marketGroupID] = false;
 					throw new Error("No such marketGroup");
@@ -52,7 +52,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 		if (this.allMarketGroupsLoaded()) {
 			cb(this.marketGroupsByID);
 		} else {
-			MarketGroupApi.getMarketGroups(function(result) {
+			marketGroupApi.getMarketGroups(function(result) {
 				for (var i = 0; i < result.length; i++) {
 					self.setMarketGroupByID(new MarketGroup(result[i]));
 				}
@@ -63,4 +63,4 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 	};
 
 	return new MarketGroups();
-});
+}]);

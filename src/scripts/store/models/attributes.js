@@ -1,4 +1,4 @@
-angular.module('models.attribute', ["api"]).
+angular.module('models.attribute', []).
 
 factory('Attribute', function() {
 	var Attribute = function(attributeData) {
@@ -24,11 +24,7 @@ factory('Attributes', ['Attribute', function(Attribute) {
 	};
 
 	Attributes.prototype.hasAttributeWithID = function(attributeID) {
-		if (this.attributesByID.hasOwnProperty(attributesID)) {
-			return true;
-		}
-
-		return false;
+		return this.attributesByID.hasOwnProperty(attributesID);
 	};
 
 	Attributes.prototype.getAttributeByID = function(attributeID) {
@@ -41,8 +37,6 @@ factory('Attributes', ['Attribute', function(Attribute) {
 
 	Attributes.prototype.hasAttributeWithName = function(attributeName) {
 		return this.attributesByName.hasOwnProperty(attributeName);
-
-		return false;
 	};
 
 	Attributes.prototype.getAttributeByName = function(attributeName) {

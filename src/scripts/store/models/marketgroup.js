@@ -1,4 +1,4 @@
-angular.module('models.marketgroup', ["api"]).
+angular.module('models.marketgroup', []).
 
 factory("MarketGroup", function() {
 	var MarketGroup = function(mgdata) {
@@ -19,40 +19,37 @@ factory("MarketGroupType", function() {
 	};
 
 	return MarketGroupType;
-}).
-
-
-}]);
+});
 
 
 
-var loadByID = function(refObj, APIFn) {
+// var loadByID = function(refObj, APIFn) {
 
 
-	return function(IDs, cb) {
+// 	return function(IDs, cb) {
 
-		//If IDs is array, join with comma
+// 		//If IDs is array, join with comma
 
-		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
-			console.log("Already stored this marketgroup");
-			//Check it's not an invalid ID which has already been loaded
-			if (this.marketGroupsByID[marketGroupID] === false) {
-				throw new Error("No such marketGroup");
-			}
+// 		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
+// 			console.log("Already stored this marketgroup");
+// 			//Check it's not an invalid ID which has already been loaded
+// 			if (this.marketGroupsByID[marketGroupID] === false) {
+// 				throw new Error("No such marketGroup");
+// 			}
 
-			cb(this.marketGroupsByID[marketGroupID]);
-		} else {
-			//Attempt to load through API
-			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
-				if (result.length === 0) {
-					marketGroupsByID[marketGroupID] = false;
-					throw new Error("No such marketGroup");
-				} else {
-					console.log("Market Group loaded succesfully");
-					marketGroupsByID[marketGroupID] = result[0];
-					cb(result[0]);
-				}
-			});
-		}
-	};
-};
+// 			cb(this.marketGroupsByID[marketGroupID]);
+// 		} else {
+// 			//Attempt to load through API
+// 			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+// 				if (result.length === 0) {
+// 					marketGroupsByID[marketGroupID] = false;
+// 					throw new Error("No such marketGroup");
+// 				} else {
+// 					console.log("Market Group loaded succesfully");
+// 					marketGroupsByID[marketGroupID] = result[0];
+// 					cb(result[0]);
+// 				}
+// 			});
+// 		}
+// 	};
+// };

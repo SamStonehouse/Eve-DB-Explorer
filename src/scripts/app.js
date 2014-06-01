@@ -1,6 +1,6 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'collections.marketgroups', 'collections.types', 'collections.marketgrouptypes']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'MarketGroupTypesManager', 'TypesManager', 'treeaccordian', function($scope, marketGroups, marketGroupTypes, typesManager, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'MarketGroupTypes', 'treeaccordian', function($scope, marketGroups, types, marketGroupTypes, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
@@ -9,10 +9,9 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.activeType = {};
 
 	var nodeSelect = function(node) {
-		console.log(node);
 		if (node.nodeData.hasTypes) {
-			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
-				$scope.data.activeMarketGroupTypes = types;
+			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(currentTypes) {
+				$scope.data.activeMarketGroupTypes = currentTypes;
 			});
 		}
 	};
@@ -35,9 +34,7 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
 
 	$scope.typeSelect = function(typeID) {
-		typesManager.getTypeByID(typeID, function(type) {
-			console.log("Type response");
-			console.log(type);
+		types.getTypeByID(typeID, function(type) {
 			$scope.data.activeType = type;
 		});
 	};

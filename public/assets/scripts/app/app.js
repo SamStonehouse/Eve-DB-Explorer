@@ -1,6 +1,6 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'datastore']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'collections.marketgroups', 'collections.types', 'collections.marketgrouptypes']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'MarketGroupTypesManager', 'TypesManager', 'treeaccordian', function($scope, marketGroups, marketGroupTypes, typesManager, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'MarketGroupTypes', 'treeaccordian', function($scope, marketGroups, types, marketGroupTypes, treeaccordian) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
@@ -9,10 +9,9 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.activeType = {};
 
 	var nodeSelect = function(node) {
-		console.log(node);
 		if (node.nodeData.hasTypes) {
-			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(types) {
-				$scope.data.activeMarketGroupTypes = types;
+			marketGroupTypes.getMarketGroupTypesByIDs(node.id, function(currentTypes) {
+				$scope.data.activeMarketGroupTypes = currentTypes;
 			});
 		}
 	};
@@ -35,9 +34,7 @@ app.controller('marketGroupController',	['$scope', 'MarketGroupsManager', 'Marke
 	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
 
 	$scope.typeSelect = function(typeID) {
-		typesManager.getTypeByID(typeID, function(type) {
-			console.log("Type response");
-			console.log(type);
+		types.getTypeByID(typeID, function(type) {
 			$scope.data.activeType = type;
 		});
 	};
@@ -53,171 +50,69 @@ factory('init', function() {
 	//Load types in group skills
 	
 });
-angular.module('api', []).
+angular.module('api.utilities', []).
 
-factory('MarketGroupApi', function($http) {
+factory("apiUtilities", ['$http', function($http) {
+	
+	var baseURL = "http://localhost:8080";
+
+	var jsonpExtension = "callback=JSON_CALLBACK";
+
+	var callApi = function(url, cb) {
+		var responsePromise = $http.jsonp(baseURL + url + '?' + jsonpExtension);
+
+		responsePromise.success(function(result) {
+			if (result && result.error) {
+				throw new Error(result.error.message);
+			}
+			
+			cb(result.result);
+		});
+
+		responsePromise.error(function(result) {
+			throw new Error("Unknown AJAX error");
+		});
+	};
+
+	return {
+		baseURL: baseURL,
+		callApi: callApi
+	};
+}]);
+angular.module('api.marketgroups', ['api.utilities']).
+
+factory('marketGroupApi', ['apiUtilities', function(apiUtilities) {
 	return {
 		getMarketGroups: function(cb) {
-			var url = "http://localhost:8080/api/inv/marketgroups?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Marketgroups response");
-				cb(result.data.result);
-			});
+			apiUtilities.callApi("/api/inv/marketgroups", cb);
 		},
 		getParentMarketGroups: function() {
-
-			var url = "http://localhost:8080/api/inv/marketgroups/parent/null?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Parent Market Group Response");
-				return result.data;
-			});
+			apiUtilities.callApi("http://localhost:8080/api/inv/marketgroups/parent/null", cb);
 		},
 		getTypesByMarketGroupID: function(mgID, cb) {
-
-			var url = "http://localhost:8080/api/inv/types/marketgroup/" + mgID + "?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Types in market group by market group ID response");
-
-				if (result.data.error) {
-					throw new Error(result.data.error.message);
-				}
-
-				cb(result.data.result);
-			});
+			apiUtilities.callApi("/api/inv/types/marketgroup/" + mgID, cb);
 		},
 		getMarketGroupByID: function(mgID, cb) {
-
-			var url = "http://localhost:8080/api/inv/marketgroups/" + mgID + "?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Market group by ID response");
-
-				if (result.data.error) {
-					throw new Error(result.data.error.message);
-				}
-
-				cb(result.data.result);
-				
-			});
+			apiUtilities.callApi("http://localhost:8080/api/inv/marketgroups/" + mgID, cb);
 		}
 	};
-}).
+}]);
+angular.module('api.typeApi', ['api.utilities']).
 
+factory('typeApi', ['apiUtilities', function(apiUtilities) {
 
-factory('TypeApi', function($http) {
 	return {
 		getTypeByID: function(typeID, cb) {
+			apiUtilities.callApi("/api/inv/types/full/" + typeID, cb);
 
-			var url = "http://localhost:8080/api/inv/types/full/" + typeID + "?callback=JSON_CALLBACK";
-
-			return $http.jsonp(url).then(function(result) {
-				console.log("Market group by ID response");
-
-				if (result.data.error) {
-					throw new Error(result.data.error.message);
-				}
-
-				cb(result.data.result);
-			});
 		}
 	};
-});
 
-angular.module('datastore', ['datastore.marketgroup', 'datastore.type']).
-
-factory('MarketGroupsManager', ['MarketGroups', function(MarketGroups, MarketGroup) {
-	var marketGroups = new MarketGroups();
-
-	return marketGroups;
-}]).
-
-factory('MarketGroupTypesManager', ['MarketGroupTypes', function(MarketGroupTypes) {
-	var marketGroupTypes = new MarketGroupTypes();
-
-	return marketGroupTypes;
-}]).
-
-factory('TypesManager', ['Types', function(Types) {
-	var types = new Types();
-
-	return types;
 }]);
-angular.module('models.attribute', ["api"]).
+angular.module('collections.marketgroups', ['api.marketgroups', 'models.marketgroup']).
 
-factory('Attribute', function() {
-	var Attribute = function(attributeData) {
-		this.id = attributeData.attributeID;
-		this.name = attributeData.attributeName;
-		this.value = attributeData.value;
-	};
+factory("MarketGroups", ["marketGroupApi", "MarketGroup", function(marketGroupApi, MarketGroup) {
 
-	return Attribute;
-}).
-
-factory('Attributes', ['Attribute', function(Attribute) {
-	var Attributes = function() {
-		this.attributesByID = {};
-		this.attributesByName = {};
-	};
-
-	Attributes.prototype.addAttribute = function(attributeData) {
-		var newAttr = new Attribute(attributeData);
-
-		this.attributesByID[newAttr.id] = newAttr;
-		this.attributesByName[newAttr.name] = newAttr;
-	};
-
-	Attributes.prototype.hasAttributeWithID = function(attributeID) {
-		if (this.attributesByID.hasOwnProperty(attributesID)) {
-			return true;
-		}
-
-		return false;
-	};
-
-	Attributes.prototype.getAttributeByID = function(attributeID) {
-		if (this.hasAttributeWithID(attributeID)) {
-			return this.attributesByID[attributeID];
-		}
-
-		return null;
-	};
-
-	Attributes.prototype.hasAttributeWithName = function(attributeName) {
-		if (this.attributesByName.hasOwnProperty(attributeName)) {
-			return true;
-		}
-
-		return false;
-	};
-
-	Attributes.prototype.getAttributeByName = function(attributeName) {
-		if (this.hasAttributeWithName(attributeName)) {
-			return this.attributesByName[attributeName];
-		}
-
-		return null;
-	};
-
-	return Attributes;
-}]);
-angular.module('models.marketgroup', ["api"]).
-
-factory("MarketGroup", function() {
-	var MarketGroup = function(mgdata) {
-		this.id = mgdata.marketGroupID;
-		this.name = mgdata.marketGroupName;
-		this.parentID = mgdata.parentGroupID;
-		this.hasTypes = mgdata.hasTypes;
-	};
-
-	return MarketGroup;
-}).
-
-factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupApi, MarketGroup) {
 	var MarketGroups = function() {
 		this.marketGroupsByID = {};
 
@@ -237,7 +132,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 			cb(self.marketGroupsByID[marketGroupID]);
 		} else {
 			//Attempt to load through API
-			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+			marketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
 				if (result.length === 0) {
 					marketGroupsByID[marketGroupID] = false;
 					throw new Error("No such marketGroup");
@@ -268,7 +163,7 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 		if (this.allMarketGroupsLoaded()) {
 			cb(this.marketGroupsByID);
 		} else {
-			MarketGroupApi.getMarketGroups(function(result) {
+			marketGroupApi.getMarketGroups(function(result) {
 				for (var i = 0; i < result.length; i++) {
 					self.setMarketGroupByID(new MarketGroup(result[i]));
 				}
@@ -278,19 +173,11 @@ factory("MarketGroups", ["MarketGroupApi", "MarketGroup", function(MarketGroupAp
 		}
 	};
 
-	return MarketGroups;
-}]).
+	return new MarketGroups();
+}]);
+angular.module('collections.marketgrouptypes', ["api.marketgroups"]).
 
-factory("MarketGroupType", function() {
-	var MarketGroupType = function(mgtdata) {
-		this.id = mgtdata.typeID;
-		this.name = mgtdata.typeName;
-	};
-
-	return MarketGroupType;
-}).
-
-factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(MarketGroupApi, MarketGroupType) {
+factory("MarketGroupTypes", ["marketGroupApi", "MarketGroupType", function(marketGroupApi, MarketGroupType) {
 	var MarketGroupTypes = function() {
 		this.marketGroupTypes = {};
 	};
@@ -305,7 +192,7 @@ factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(Marke
 
 		} else {
 			//Attempt to load through API
-			MarketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
+			marketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
 				var types = [];
 
 				for (var i = 0; i < result.length; i++) {
@@ -327,42 +214,176 @@ factory("MarketGroupTypes", ["MarketGroupApi", "MarketGroupType", function(Marke
 		this.marketGroupTypes[marketGroupID] = types;
 	};
 
-	return MarketGroupTypes;
+	return new MarketGroupTypes();
 }]);
+angular.module('collections.types', ['api.typeApi', 'models.type']).
 
+factory("Types", ["Type", "typeApi", function(Type, typeApi) {
+	var Types = function() {
+		this.typesByID = {};
+		this.typesInGroup = {};
+	};
 
+	Types.prototype.getTypeByID = function(typeID, cb) {
+		var self = this;
 
-var loadByID = function(refObj, APIFn) {
-
-
-	return function(IDs, cb) {
-
-		//If IDs is array, join with comma
-
-		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
-			console.log("Already stored this marketgroup");
-			//Check it's not an invalid ID which has already been loaded
-			if (this.marketGroupsByID[marketGroupID] === false) {
-				throw new Error("No such marketGroup");
+		if (self.typeLoaded(typeID)) {
+			if (self.typesByID[typeID] === false) {
+				throw new Error("No such type with id: " + typeID);
+			} else {
+				cb(self.typesByID[typeID]);
 			}
-
-			cb(this.marketGroupsByID[marketGroupID]);
 		} else {
-			//Attempt to load through API
-			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+			typeApi.getTypeByID(typeID, function(result) {
 				if (result.length === 0) {
-					marketGroupsByID[marketGroupID] = false;
-					throw new Error("No such marketGroup");
+					self.setTypeByID(typeID, false);
+					throw new Error("No such type with id: " + typeID);
 				} else {
-					console.log("Market Group loaded succesfully");
-					marketGroupsByID[marketGroupID] = result[0];
-					cb(result[0]);
+					var type = new Type(result[0]);
+					self.setTypeByID(type.id, type);
+					cb(type);
 				}
 			});
 		}
 	};
-};
-angular.module('models.skill', ["api"]).
+
+	Types.prototype.typeLoaded = function(typeID) {
+		return this.typesByID.hasOwnProperty(typeID);
+	};
+
+	Types.prototype.setTypeByID = function(typeID, type) {
+		this.typesByID[typeID] = type;
+	};
+
+	Types.prototype.getTypesInGroup = function(groupID, cb) {
+
+	};
+
+	Types.prototype.groupLoaded = function(groupID) {
+
+	};
+
+	Types.prototype.setGroupByID = function(groupID, groupTypes) {
+		this.typesInGroup[groupID] = [];
+
+		//Add all types in this group to the type by id reference too
+		for (var i = 0; i < groupTypes.length; i++) {
+			if (this.typeLoaded.hasOwnProperty(gp)) {
+				this.setTypeByID(groupTypes[gp].id, new Type(groupTypes[gp]))	;
+				typesInGroup[groupID] .push();
+			}
+		}
+	};
+
+	return new Types();
+}]).
+
+factory("Skills", function() {
+
+});
+angular.module('models.attribute', []).
+
+factory('Attribute', function() {
+	var Attribute = function(attributeData) {
+		this.id = attributeData.attributeID;
+		this.name = attributeData.attributeName;
+		this.value = attributeData.value;
+	};
+
+	return Attribute;
+}).
+
+factory('Attributes', ['Attribute', function(Attribute) {
+	var Attributes = function() {
+		this.attributesByID = {};
+		this.attributesByName = {};
+	};
+
+	Attributes.prototype.addAttribute = function(attributeData) {
+		var newAttr = new Attribute(attributeData);
+
+		this.attributesByID[newAttr.id] = newAttr;
+		this.attributesByName[newAttr.name] = newAttr;
+	};
+
+	Attributes.prototype.hasAttributeWithID = function(attributeID) {
+		return this.attributesByID.hasOwnProperty(attributesID);
+	};
+
+	Attributes.prototype.getAttributeByID = function(attributeID) {
+		if (this.hasAttributeWithID(attributeID)) {
+			return this.attributesByID[attributeID];
+		}
+
+		return null;
+	};
+
+	Attributes.prototype.hasAttributeWithName = function(attributeName) {
+		return this.attributesByName.hasOwnProperty(attributeName);
+	};
+
+	Attributes.prototype.getAttributeByName = function(attributeName) {
+		return this.hasAttributeWithName(attributeName);
+	};
+
+	return Attributes;
+}]);
+angular.module('models.marketgroup', []).
+
+factory("MarketGroup", function() {
+	var MarketGroup = function(mgdata) {
+		this.id = mgdata.marketGroupID;
+		this.name = mgdata.marketGroupName;
+		this.parentID = mgdata.parentGroupID;
+		this.hasTypes = mgdata.hasTypes;
+	};
+
+	return MarketGroup;
+}).
+
+
+factory("MarketGroupType", function() {
+	var MarketGroupType = function(mgtdata) {
+		this.id = mgtdata.typeID;
+		this.name = mgtdata.typeName;
+	};
+
+	return MarketGroupType;
+});
+
+
+
+// var loadByID = function(refObj, APIFn) {
+
+
+// 	return function(IDs, cb) {
+
+// 		//If IDs is array, join with comma
+
+// 		if (this.marketGroupsByID.hasOwnProperty(marketGroupID)) {
+// 			console.log("Already stored this marketgroup");
+// 			//Check it's not an invalid ID which has already been loaded
+// 			if (this.marketGroupsByID[marketGroupID] === false) {
+// 				throw new Error("No such marketGroup");
+// 			}
+
+// 			cb(this.marketGroupsByID[marketGroupID]);
+// 		} else {
+// 			//Attempt to load through API
+// 			MarketGroupApi.getMarketGroupByID(marketGroupID, function(result) {
+// 				if (result.length === 0) {
+// 					marketGroupsByID[marketGroupID] = false;
+// 					throw new Error("No such marketGroup");
+// 				} else {
+// 					console.log("Market Group loaded succesfully");
+// 					marketGroupsByID[marketGroupID] = result[0];
+// 					cb(result[0]);
+// 				}
+// 			});
+// 		}
+// 	};
+// };
+angular.module('models.skill', []).
 
 factory("Skill", function() {
 
@@ -435,7 +456,7 @@ factory("SkillTree", function() {
 
 	return SkillTree;
 });
-angular.module('models.type', ['datastore.attribute', 'api']).
+angular.module('models.type', ['models.attribute']).
 
 factory("Type", ["Attributes", function(Attributes) {
 	var Type = function(typeData) {
@@ -451,53 +472,14 @@ factory("Type", ["Attributes", function(Attributes) {
 		}
 	};
 
-
-
 	return Type;
-}]).
-
-factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
-	var Types = function() {
-		this.typesByID = {};
-	};
-
-	Types.prototype.getTypeByID = function(typeID, cb) {
-		var self = this;
-
-		if (self.typeLoaded(typeID)) {
-			if (self.typesByID[typeID] === false) {
-				throw new Error("No such type with id: " + typeID);
-			} else {
-				cb(self.typesByID[typeID]);
-			}
-		} else {
-			TypeApi.getTypeByID(typeID, function(result) {
-				if (result.length === 0) {
-					self.setTypeByID(typeID, false);
-					throw new Error("No such type with id: " + typeID);
-				} else {
-					var type = new Type(result[0]);
-					self.setTypeByID(type.id, type);
-					cb(type);
-				}
-			});
-		}
-	};
-
-	Types.prototype.typeLoaded = function(typeID) {
-		return this.typesByID.hasOwnProperty(typeID);
-	};
-
-	Types.prototype.setTypeByID = function(typeID, type) {
-		this.typesByID[typeID] = type;
-	};
-
-	return Types;
 }]);
+
+
 angular.module('ui.sidebar.attributes', []).
 
 factory('attributesDisplay', function() {
-
+	
 });
 angular.module('ui.treeaccordian', []).
 

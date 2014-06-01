@@ -1,6 +1,6 @@
-angular.module('collections.types', ['api', 'models.type']).
+angular.module('collections.types', ['api.typeApi', 'models.type']).
 
-factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
+factory("Types", ["Type", "typeApi", function(Type, typeApi) {
 	var Types = function() {
 		this.typesByID = {};
 		this.typesInGroup = {};
@@ -16,7 +16,7 @@ factory("Types", ["Type", "TypeApi", function(Type, TypeApi) {
 				cb(self.typesByID[typeID]);
 			}
 		} else {
-			TypeApi.getTypeByID(typeID, function(result) {
+			typeApi.getTypeByID(typeID, function(result) {
 				if (result.length === 0) {
 					self.setTypeByID(typeID, false);
 					throw new Error("No such type with id: " + typeID);
