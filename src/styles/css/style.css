@@ -7490,6 +7490,9 @@ body,
   width: 250px;
   height: 100%;
 }
+.main-content {
+  padding-left: 500px;
+}
 .accordian {
   list-style: none;
   padding: 0;

@@ -1,6 +1,6 @@
-var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'collections.marketgroups', 'collections.types', 'collections.marketgrouptypes']);
+var app = angular.module('ExplorerApp', ['ui.treeaccordian', 'collections.marketgroups', 'collections.types', 'collections.marketgrouptypes', 'Shared']);
 
-app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'MarketGroupTypes', 'treeaccordian', function($scope, marketGroups, types, marketGroupTypes, treeaccordian) {
+app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'MarketGroupTypes', 'treeaccordian', 'activeType', function($scope, marketGroups, types, marketGroupTypes, treeaccordian, activeType) {
 	var marketGroupAccordian = new treeaccordian.TreeAccordian();
 
 	$scope.data = {};
@@ -15,6 +15,8 @@ app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'Mar
 			});
 		}
 	};
+
+	//Todo: Maybe build this in init? Spawn off to worker thread? *shrug*
 
 	marketGroups.getAllMarketGroups(function(marketGroups) {
 		console.log(marketGroups);
@@ -31,17 +33,18 @@ app.controller('marketGroupController',	['$scope', 'MarketGroups', 'Types', 'Mar
 		marketGroupAccordian.createTree();
 	});
 
-	$scope.data.marketGroupAccordian = marketGroupAccordian; // TODO: Filter out unnecessary nodes (or not load them in the first place)
+	$scope.data.marketGroupAccordian = marketGroupAccordian;
 
 	$scope.typeSelect = function(typeID) {
 		types.getTypeByID(typeID, function(type) {
-			$scope.data.activeType = type;
+			activeType.setActiveType(type);
 		});
 	};
 }]);
 
-app.controller('typeDisplayController', ['$scope', function($scope) {
-
+app.controller('typeDisplayController', ['$scope', 'activeType', function($scope, activeType) {
+	$scope.data = {derp: "DERP", name: "Dog"};
+	$scope.data.activeTypeHolder = activeType;
 }]);
 angular.module('Init', []).
 
@@ -49,6 +52,24 @@ factory('init', function() {
 
 	//Load types in group skills
 	
+});
+angular.module('Shared', []).
+
+factory('activeType', function() {
+	var ActiveTypeHolder = function() {
+		this.activeType = {};
+	};
+
+	ActiveTypeHolder.prototype.setActiveType = function(activeType) {
+		this.activeType = activeType;
+		console.log("Set active types");
+	};
+
+	ActiveTypeHolder.prototype.getActiveTypeData = function() {
+		return this;
+	};
+
+	return new ActiveTypeHolder();
 });
 /*
  * angular-ui-bootstrap
@@ -4593,6 +4614,41 @@ factory("Type", ["Attributes", function(Attributes) {
 }]);
 
 
+angular.module('ui.attributes', []).
+
+factory('attributeWriter', function() {
+	var AttributeWriter = function) {
+
+		//Maps attributeGroupID to AttributeGroups
+		this.attributeGroups = {};
+	};
+
+	AttributeWriter.prototype.addAttribute = function(attribute) {
+		var group = attributeUIGroupMap[attribute.id];
+
+
+
+	};
+
+	AttributeWriter.prototype.hasGroup = function(group) {
+		for (var currentGroup in this.attributeGroups) {
+			if (this.attributeGroups.hasOwnProperty(currentGroup)) {
+
+			}
+		}
+	};
+
+	var AttributeUIGroup = function(name) {
+
+	};
+
+	//Map the attributes to their group
+	var attributeUIGroupMap = {
+
+	};
+
+
+});
 angular.module('ui.sidebar.attributes', []).
 
 factory('attributesDisplay', function() {

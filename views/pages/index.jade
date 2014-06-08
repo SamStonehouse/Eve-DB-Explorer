@@ -8,18 +8,15 @@ block sidebar
 		.sidebar-left
 			accordiancontainer(children="data.marketGroupAccordian.children")
 		.sidebar-right
-			.upper-sidebar-right
+			.sidebar-right
 				div(ng-repeat="type in data.activeMarketGroupTypes", ng-click="typeSelect(type.id)").sidebar-selectable {{ type.name }}
-			.lower-sidebar-right
-				h5 {{ data.activeType.name }}
-				p {{ data.activeType.id }}
-				p {{ data.activeType.description }}
 
-				{{ data.activeType }}
 
 block main
-	div(ng-controller="typeDisplayController")
-		
+	div(ng-controller="typeDisplayController").main-content
+		h2 {{ data.activeTypeHolder.activeType.name }} ({{ data.activeTypeHolder.activeType.id }})
+		p {{ data.activeTypeHolder.activeType.description }}
+		{{ data.activeTypeHolder.activeType.attributes }}
 
 block footer
 	include ../includes/footer
