@@ -4242,10 +4242,64 @@ factory('typeApi', ['apiUtilities', function(apiUtilities) {
 	return {
 		getTypeByID: function(typeID, cb) {
 			apiUtilities.callApi("/api/inv/types/full/" + typeID, cb);
-
 		}
 	};
 
+}]);
+angular.module('api.unitApi', ['api.utilities']).
+
+factory('unitApi', ['apiUtilities', function(apiUtilities) {
+
+	return {
+		getAllUnits: function(cb) {
+			apiUtilities.callApi("/api/eve/units", cb);
+		},
+		getUnitByID: function(unitID, cb) {
+			apiUtilities.callApi("/api/eve/units/" + unitID, cb);
+		}
+	};
+
+}]);
+angular.module('collections.marketgrouptypes', ["api.marketgroups"]).
+
+factory("MarketGroupTypes", ["marketGroupApi", "MarketGroupType", function(marketGroupApi, MarketGroupType) {
+	var MarketGroupTypes = function() {
+		this.marketGroupTypes = {};
+	};
+
+	MarketGroupTypes.prototype.getMarketGroupTypesByIDs = function(marketGroupID, cb) {
+		var self = this;
+
+		if (self.marketGroupTypesLoaded(marketGroupID)) {
+
+			//Check it's not an invalid ID which has already been loaded
+			cb(self.marketGroupTypes[marketGroupID]);
+
+		} else {
+			//Attempt to load through API
+			marketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
+				var types = [];
+
+				for (var i = 0; i < result.length; i++) {
+					types.push(new MarketGroupType(result[i]));
+				}
+
+				cb(types);
+				self.setMarketGroupTypes(marketGroupID, types);
+			});
+		}
+	};
+
+	MarketGroupTypes.prototype.marketGroupTypesLoaded = function(marketGroupID) {
+		return this.marketGroupTypes.hasOwnProperty(marketGroupID);
+	};
+
+
+	MarketGroupTypes.prototype.setMarketGroupTypes = function(marketGroupID, types) {
+		this.marketGroupTypes[marketGroupID] = types;
+	};
+
+	return new MarketGroupTypes();
 }]);
 angular.module('collections.marketgroups', ['api.marketgroups', 'models.marketgroup']).
 
@@ -4313,47 +4367,6 @@ factory("MarketGroups", ["marketGroupApi", "MarketGroup", function(marketGroupAp
 
 	return new MarketGroups();
 }]);
-angular.module('collections.marketgrouptypes', ["api.marketgroups"]).
-
-factory("MarketGroupTypes", ["marketGroupApi", "MarketGroupType", function(marketGroupApi, MarketGroupType) {
-	var MarketGroupTypes = function() {
-		this.marketGroupTypes = {};
-	};
-
-	MarketGroupTypes.prototype.getMarketGroupTypesByIDs = function(marketGroupID, cb) {
-		var self = this;
-
-		if (self.marketGroupTypesLoaded(marketGroupID)) {
-
-			//Check it's not an invalid ID which has already been loaded
-			cb(self.marketGroupTypes[marketGroupID]);
-
-		} else {
-			//Attempt to load through API
-			marketGroupApi.getTypesByMarketGroupID(marketGroupID, function(result) {
-				var types = [];
-
-				for (var i = 0; i < result.length; i++) {
-					types.push(new MarketGroupType(result[i]));
-				}
-
-				cb(types);
-				self.setMarketGroupTypes(marketGroupID, types);
-			});
-		}
-	};
-
-	MarketGroupTypes.prototype.marketGroupTypesLoaded = function(marketGroupID) {
-		return this.marketGroupTypes.hasOwnProperty(marketGroupID);
-	};
-
-
-	MarketGroupTypes.prototype.setMarketGroupTypes = function(marketGroupID, types) {
-		this.marketGroupTypes[marketGroupID] = types;
-	};
-
-	return new MarketGroupTypes();
-}]);
 angular.module('collections.types', ['api.typeApi', 'models.type']).
 
 factory("Types", ["Type", "typeApi", function(Type, typeApi) {
@@ -4419,6 +4432,7 @@ factory("Types", ["Type", "typeApi", function(Type, typeApi) {
 factory("Skills", function() {
 
 });
+
 angular.module('models.attribute', []).
 
 factory('Attribute', function() {
@@ -4465,7 +4479,62 @@ factory('Attributes', ['Attribute', function(Attribute) {
 	};
 
 	return Attributes;
-}]);
+}]).
+
+factory('AttributeUnits', function() {
+
+	var getCommas = function(str) {
+		var remain = str%1;
+
+		var amount = new String(Math.floor(str));
+		amount = amount.split("").reverse();
+
+		var output = [];
+
+		for (var i = 0; i < amount.length; i++) {
+			output.push(amount[i]);
+			if ((i + 1)%3 === 0) && (i < amount.length -1) {
+				output.push(",");
+			}
+		}
+
+		if (remain === 0) {
+			remain = "";
+		} else {
+			remain = remain + new String(remain).slice(1);
+		}
+
+		return output + remain;
+	};
+
+	var AttributeUnit = function(name, unit, renderFunction) {
+		this.name = name;
+		this.unit = unit;
+		this.renderFunction = renderFunction;
+	};
+
+	var percentUnit = new AttributeUnit("Percent", "%", function(value) {
+		return value + "%";
+	});
+
+	var lengthUnit = new AttributeUnit("Length", "m", function(value) {
+		return value + "m";
+	});
+
+	var areaUnit = new AttributeUnit("Area", "m2", function(value) {
+		return value + "m<sup>2</sup>";
+	});
+
+	var volumeUnit = new AttributeUnit("Volume", "m3", function(value) {
+		return value + "m<sup>3</sup>";
+	});
+
+	var massUnit = new AttributeUnit("Mass", "kg", function(value) {
+		return value + "kg";
+	});
+
+
+});
 angular.module('models.marketgroup', []).
 
 factory("MarketGroup", function() {
@@ -4614,6 +4683,7 @@ factory("Type", ["Attributes", function(Attributes) {
 }]);
 
 
+
 angular.module('ui.attributes', []).
 
 factory('attributeWriter', function() {
@@ -4681,7 +4751,7 @@ factory('treeaccordian', function() {
 				} else if (this.allNodes.hasOwnProperty(parentID)) {
 					this.allNodes[parentID].addChild(node);
 				} else {
-					console.log("No parent, ahh!");
+					console.log("[TreeAccordian] Warn: Node has no parent");
 				}
 			}
 		}

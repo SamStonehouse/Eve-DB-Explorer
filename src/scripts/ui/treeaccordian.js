@@ -25,7 +25,7 @@ factory('treeaccordian', function() {
 				} else if (this.allNodes.hasOwnProperty(parentID)) {
 					this.allNodes[parentID].addChild(node);
 				} else {
-					console.log("No parent, ahh!");
+					console.log("[TreeAccordian] Warn: Node has no parent");
 				}
 			}
 		}
